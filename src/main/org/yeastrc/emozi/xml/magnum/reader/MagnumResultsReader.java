@@ -3,8 +3,6 @@ package org.yeastrc.emozi.xml.magnum.reader;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -15,6 +13,13 @@ import org.yeastrc.emozi.xml.magnum.objects.MagnumResults;
 
 public class MagnumResultsReader {
 
+	/**
+	 * Get the parsed magnum results for the given magnum txt data file
+	 * 
+	 * @param magnumFile
+	 * @return
+	 * @throws Throwable
+	 */
 	public static MagnumResults getMagnumResults( File magnumFile ) throws Throwable {
 		
 	    try ( InputStream is = new FileInputStream( magnumFile ) ) {
@@ -22,10 +27,19 @@ public class MagnumResultsReader {
 	    }
 		
 	}
-	
+
+	/**
+	 * Get the parsed magnum results for the given inputstream
+	 * 
+	 * @param is
+	 * @return
+	 * @throws Throwable
+	 */
 	protected static MagnumResults getMagnumResults( InputStream is ) throws Throwable {
 		
 		MagnumResults magnumResults = new MagnumResults();
+
+
 		
 		try( BufferedReader br = new BufferedReader( new InputStreamReader( is ) ) ) {
 
@@ -58,8 +72,8 @@ public class MagnumResultsReader {
 		    			
 		    			throw t;
 		    		}
-
 		    		
+		    		addPSMToMagnumResults( magnumPSM, magnumResults );
 		    	}
 
 		     }
@@ -67,16 +81,47 @@ public class MagnumResultsReader {
 			
 		}
 		
+		return magnumResults;
+	}
+
+	/**
+	 * Add the given psm to the given magnum results
+	 * 
+	 * @param psm
+	 * @param results
+	 * @throws Throwable
+	 */
+	protected static void addPSMToMagnumResults( MagnumPSM psm, MagnumResults results ) throws Throwable {
+		
+		if( results.getReportedPeptidePSMMap() == null )
+			results.setReportedPeptidePSMMap( new HashMap<>() );		
+
+		Map<String, Map<Integer, MagnumPSM>> peptidePsmMap = results.getReportedPeptidePSMMap();
+
+		if( !peptidePsmMap.containsKey( psm.getReportedPeptide() ) )
+			peptidePsmMap.put( psm.getReportedPeptide(), new HashMap<>() );
+		
+		Map<Integer, MagnumPSM> scanMapForReportedPeptide = peptidePsmMap.get( psm.getReportedPeptide() );
+		
+		if( scanMapForReportedPeptide.containsKey( psm.getScanNumber() ) )
+			throw new Exception( "Found more than one instance of the same scan matching the same"
+					+ " reported peptide. Scan number: " + psm.getScanNumber()
+					+ ", peptide: " + psm.getReportedPeptide() );
+		
+		scanMapForReportedPeptide.put( psm.getScanNumber(), psm );
 	}
 	
-	
+	/**
+	 * Get a MagnumPSM which is parsed from the given line of text reported by magnum, using
+	 * the supplied header columns.
+	 * 
+	 * @param line
+	 * @param headerColumns
+	 * @return
+	 */
 	protected static MagnumPSM getMagnumPSM( String line, Map<String, Integer> headerColumns ) {
 		
 		String[] fields = line.split( "\t" );
-		
-		if( fields.length != headerColumns.size() )
-			throw new IllegalArgumentException( "Number of fields did not match number of headers for line: " + line + ". Expected " + headerColumns.size() + " fields." );
-
 		
 		MagnumPSM psm = new MagnumPSM();
 		
