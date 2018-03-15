@@ -132,9 +132,23 @@ public class MagnumPSM {
 	public void setdScore(double dScore) {
 		this.dScore = dScore;
 	}
-	
+	/**
+	 * @return the charge
+	 */
+	public int getCharge() {
+		return charge;
+	}
+	/**
+	 * @param charge the charge to set
+	 */
+	public void setCharge(int charge) {
+		this.charge = charge;
+	}
+
+
 	private double retentionTime;
 	private int scanNumber;
+	private int charge;
 	private String reportedPeptide;
 	private double observedMass;
 	private double ppmError;

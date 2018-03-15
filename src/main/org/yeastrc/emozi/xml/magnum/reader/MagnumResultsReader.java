@@ -81,7 +81,15 @@ public class MagnumResultsReader {
 		MagnumPSM psm = new MagnumPSM();
 		
 		psm.setdScore( Double.parseDouble( fields[ headerColumns.get( "dScore" ) ] ) );
-		
+		psm.seteValue( Double.parseDouble( fields[ headerColumns.get( "e-value" ) ] ) );
+		psm.setObservedMass( Double.parseDouble( fields[ headerColumns.get( "Obs Mass" ) ] ) );
+		psm.setPpmError( Double.parseDouble( fields[ headerColumns.get( "PPM Error" ) ] ) );
+		psm.setReportedPeptide( fields[ headerColumns.get( "Peptide #1" ) ] );
+		psm.setRetentionTime( Double.parseDouble( fields[ headerColumns.get( "Ret Time" ) ] ) );
+		psm.setScanNumber( Integer.parseInt( fields[ headerColumns.get( "Scan Number" ) ] ) );
+		psm.setScore( Double.parseDouble( fields[ headerColumns.get( "Score" ) ] ) );
+		psm.setCharge( Integer.parseInt( fields[ headerColumns.get( "Charge" ) ] ) );
+
 		
 		return psm;
 	}
