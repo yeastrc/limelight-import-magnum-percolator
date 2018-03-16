@@ -2,7 +2,7 @@ package org.yeastrc.emozi.xml.magnum.objects;
 
 import java.io.File;
 
-public class AnalysisParameters {
+public class ConversionParameters {
 		
 	/**
 	 * @return the fastaFile
@@ -64,12 +64,27 @@ public class AnalysisParameters {
 	 */
 	public void setConversionProgramInfo(ConversionProgramInfo conversionProgramInfo) {
 		this.conversionProgramInfo = conversionProgramInfo;
+	}	
+	/**
+	 * @return the emoziXMLOutputFile
+	 */
+	public File getEmoziXMLOutputFile() {
+		return emoziXMLOutputFile;
 	}
+	/**
+	 * @param emoziXMLOutputFile the emoziXMLOutputFile to set
+	 */
+	public void setEmoziXMLOutputFile(File emoziXMLOutputFile) {
+		this.emoziXMLOutputFile = emoziXMLOutputFile;
+	}
+
+
 
 	private File fastaFile;
 	private File magnumParametersFile;
 	private File percolatorXMLOutputFile;
 	private File magnumOutputFile;
+	private File emoziXMLOutputFile;
 	private ConversionProgramInfo conversionProgramInfo;
 	
 }

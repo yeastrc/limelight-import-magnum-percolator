@@ -94,6 +94,10 @@ public class PercolatorResultsReader {
 				throw new Exception( "Peptide contains psmId: " + psmId + ", but no PSM with that id was found. Peptide: " + xpeptide.getPeptideId() );
 			
 			PercolatorPSM psm = psmIdPSMMap.get( psmId );	
+			
+			if( !psm.getReportedPeptide().equals( xpeptide.getPeptideId() ) )
+				throw new Exception( "PSM (" + psm + ") has a different reported peptide than this peptide id: " + xpeptide.getPeptideId() );
+			
 			psmsForPeptide.put( psm.getScanNumber(), psm );
 
 		}

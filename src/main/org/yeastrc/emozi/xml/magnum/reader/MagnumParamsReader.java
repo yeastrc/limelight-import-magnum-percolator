@@ -1,6 +1,9 @@
 package org.yeastrc.emozi.xml.magnum.reader;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -9,8 +12,35 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.yeastrc.emozi.xml.magnum.objects.MagnumParameters;
+
 public class MagnumParamsReader {
 
+	/**
+	 * Get the relevant parameters from the magnum params file
+	 * 
+	 * @param paramsFile
+	 * @return
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public static MagnumParameters getMagnumParameters( File paramsFile ) throws FileNotFoundException, IOException {
+		
+		MagnumParameters magParams = new MagnumParameters();
+		
+		try ( InputStream is = new FileInputStream( paramsFile ) ) {
+			magParams.setDynamicMods( getDynamicModsFromParamsFile( is ) );
+		}
+		
+		try ( InputStream is = new FileInputStream( paramsFile ) ) {
+			magParams.setStaticMods( getStaticModsFromParamsFile( is ) );
+		}
+		
+		
+		return magParams;
+	}
+	
+	
 	/**
 	 * 
 	 * Example line: modification = C   57.02146 #foo comments

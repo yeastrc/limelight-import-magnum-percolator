@@ -2,6 +2,17 @@ package org.yeastrc.emozi.xml.magnum.objects;
 
 public class PercolatorPSM {
 	
+	
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "PercolatorPSM [svmScore=" + svmScore + ", qValue=" + qValue + ", pValue=" + pValue + ", pep=" + pep
+				+ ", reportedPeptide=" + reportedPeptide + ", psmId=" + psmId + ", scanNumber=" + scanNumber + "]";
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
