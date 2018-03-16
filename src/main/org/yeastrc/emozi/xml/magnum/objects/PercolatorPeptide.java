@@ -1,9 +1,18 @@
 package org.yeastrc.emozi.xml.magnum.objects;
 
-import java.util.Collection;
-
 public class PercolatorPeptide {
 	
+	
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "PercolatorPeptide [svmScore=" + svmScore + ", qValue=" + qValue + ", pValue=" + pValue + ", pep=" + pep
+				+ ", reportedPeptide=" + reportedPeptide + "]";
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -95,24 +104,11 @@ public class PercolatorPeptide {
 	public void setReportedPeptide(String reportedPeptide) {
 		this.reportedPeptide = reportedPeptide;
 	}
-	/**
-	 * @return the psms
-	 */
-	public Collection<PercolatorPSM> getPsms() {
-		return psms;
-	}
-	/**
-	 * @param psms the psms to set
-	 */
-	public void setPsms(Collection<PercolatorPSM> psms) {
-		this.psms = psms;
-	}
 	
 	private double svmScore;
 	private double qValue;
 	private double pValue;
 	private double pep;
 	private String reportedPeptide;
-	private Collection<PercolatorPSM> psms;
 	
 }
