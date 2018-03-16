@@ -12,7 +12,6 @@
 
 # Package Files #
 *.ear
-*.zip
 *.tar.gz
 *.rar
 
@@ -22,3 +21,5 @@ hs_err_pid*
 
 .project
 .classpath
+/deploy/
+/classes/
