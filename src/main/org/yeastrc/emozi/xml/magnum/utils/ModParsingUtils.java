@@ -29,8 +29,8 @@ public class ModParsingUtils {
 		if( !magnumParameters.getDynamicMods().containsKey( residue ) )
 			return true;
 		
-		// consider these to be the same if within 0.00001
-		if( Math.abs( modMass - magnumParameters.getDynamicMods().get( residue ) ) <= 0.00001 ) {
+		// consider these to be the same if within 0.01
+		if( Math.abs( modMass - magnumParameters.getDynamicMods().get( residue ) ) <= 0.01 ) {
 			return false;
 		}
 		
