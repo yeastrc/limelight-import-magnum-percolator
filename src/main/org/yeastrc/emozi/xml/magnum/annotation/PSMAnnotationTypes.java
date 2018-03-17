@@ -30,6 +30,7 @@ import org.yeastrc.emozi.xml.magnum.constants.Constants;
 public class PSMAnnotationTypes {
 
 	// comet scores
+	public static final String MAGNUM_ANNOTATION_TYPE_EVALUE = "E-Value";
 	public static final String MAGNUM_ANNOTATION_TYPE_SCORE = "Score";
 	public static final String MAGNUM_ANNOTATION_TYPE_DSCORE = "dScore";
 	public static final String MAGNUM_ANNOTATION_TYPE_PPMERROR = "PPM Error";
@@ -46,6 +47,17 @@ public class PSMAnnotationTypes {
 		List<FilterablePsmAnnotationType> types = new ArrayList<FilterablePsmAnnotationType>();
 
 		if( programName.equals( Constants.PROGRAM_NAME_MAGNUM ) ) {
+
+			{
+				FilterablePsmAnnotationType type = new FilterablePsmAnnotationType();
+				type.setName( MAGNUM_ANNOTATION_TYPE_EVALUE );
+				type.setDescription( "Expect value" );
+				type.setFilterDirection( FilterDirectionType.BELOW );
+				type.setDefaultFilter( false );
+	
+				types.add( type );
+			}
+			
 			{
 				FilterablePsmAnnotationType type = new FilterablePsmAnnotationType();
 				type.setName( MAGNUM_ANNOTATION_TYPE_SCORE );

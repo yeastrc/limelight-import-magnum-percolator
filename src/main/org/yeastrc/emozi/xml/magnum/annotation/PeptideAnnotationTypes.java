@@ -35,7 +35,7 @@ public class PeptideAnnotationTypes {
 
 	
 	
-	public static List<FilterableReportedPeptideAnnotationType> getFilterablePsmAnnotationTypes( String programName ) {
+	public static List<FilterableReportedPeptideAnnotationType> getFilterablePeptideAnnotationTypes( String programName ) {
 		List<FilterableReportedPeptideAnnotationType> types = new ArrayList<FilterableReportedPeptideAnnotationType>();
 
 		if( programName.equals( Constants.PROGRAM_NAME_PERCOLATOR ) ) {

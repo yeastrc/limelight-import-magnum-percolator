@@ -27,7 +27,7 @@ import org.yeastrc.emozi.xml.magnum.constants.Constants;
 public class PSMDefaultVisibleAnnotationTypes {
 
 	/**
-	 * Get the default visibile annotation types for Magnum data
+	 * Get the default visible annotation types for Magnum data
 	 * @return
 	 */
 	public static List<SearchAnnotation> getDefaultVisibleAnnotationTypes() {
@@ -37,6 +37,13 @@ public class PSMDefaultVisibleAnnotationTypes {
 			SearchAnnotation annotation = new SearchAnnotation();
 			annotation.setAnnotationName( PSMAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_QVALUE );
 			annotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
+			annotations.add( annotation );
+		}
+		
+		{
+			SearchAnnotation annotation = new SearchAnnotation();
+			annotation.setAnnotationName( PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_EVALUE );
+			annotation.setSearchProgram( Constants.PROGRAM_NAME_MAGNUM );
 			annotations.add( annotation );
 		}
 

@@ -222,9 +222,8 @@ public class PercolatorResultsReader {
 	protected static IPercolatorOutput getIPercolatorOutput( File file ) throws Exception {
 		
 		String xsdVersion = PercolatorOutXMLUtils.getXSDVersion( file );
-		System.err.println( "Using XSD version: " + xsdVersion );
 		
-		JAXBContext jaxbContext = JAXBContext.newInstance( xsdVersion );
+		JAXBContext jaxbContext = JAXBContext.newInstance( "com.per_colator.percolator_out._" + xsdVersion );
 		Unmarshaller u = jaxbContext.createUnmarshaller();
 		IPercolatorOutput po = (IPercolatorOutput)u.unmarshal( file );
 	

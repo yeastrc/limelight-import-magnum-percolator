@@ -18,6 +18,7 @@
 
 package org.yeastrc.emozi.xml.magnum.main;
 
+import org.yeastrc.emozi.xml.magnum.builder.XMLBuilder;
 import org.yeastrc.emozi.xml.magnum.objects.ConversionParameters;
 import org.yeastrc.emozi.xml.magnum.objects.MagnumParameters;
 import org.yeastrc.emozi.xml.magnum.objects.MagnumResults;
@@ -54,7 +55,9 @@ public class ConverterRunner {
 		DataComparer.compareData( magnumResults, percolatorResults );
 		System.err.println( " Done." );
 		
-		
+		System.err.print( "Writing out XML..." );
+		(new XMLBuilder()).buildAndSaveXML( conversionParameters, magnumResults, magParams, percolatorResults);
+		System.err.println( " Done." );
 		
 		
 	}
