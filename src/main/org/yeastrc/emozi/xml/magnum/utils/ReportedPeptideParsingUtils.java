@@ -25,7 +25,12 @@ import org.yeastrc.emozi.xml.magnum.objects.ParsedPeptide;
 
 public class ReportedPeptideParsingUtils {
 
-	
+	/**
+	 * Get a ParsedPeptide, which is a peptide parsed from a reported peptide with the
+	 * form of PEP[138.32]TIDE. Makes parsed mods and peptide sequence available.
+	 * @param peptideSequence
+	 * @return
+	 */
 	public static ParsedPeptide parsePeptide( String peptideSequence ) {
 		
 		StringBuilder nakedSequence = new StringBuilder();
@@ -39,9 +44,18 @@ public class ReportedPeptideParsingUtils {
 		    
 		    if( c == '[' ) {
 		    
+		    	if( numberBuild != null )
+		    		throw new IllegalArgumentException( "Invalid peptide format. Got: " + peptideSequence );   // got a [ while already building a number
+		    	
 		    	numberBuild = new StringBuilder();
 		    	
 		    } else if( c == ']' ) {
+		    	
+		    	if( numberBuild == null )
+		    		throw new IllegalArgumentException( "Invalid peptide format. Got: " + peptideSequence );	// got a ] without a preceding [
+		    	
+		    	if( !(numberBuild.toString()).matches( "^-?\\d+(\\.\\d+)?$") )
+		    		throw new IllegalArgumentException( "Invalid peptide format. Got: " + peptideSequence );	// did not get a valid number for the mod mass
 		    	
 		    	modMap.put( peptidePosition, Double.parseDouble( numberBuild.toString() ) );
 		    	numberBuild = null;
@@ -52,10 +66,20 @@ public class ReportedPeptideParsingUtils {
 		    	
 		    } else {
 		    	
+		    	if( !Character.isUpperCase( c ) )
+		    		throw new IllegalArgumentException( "Invalid peptide format. Got: " + peptideSequence );	// did not get an uppercase letter while building the sequence
+
+		    	
 		    	peptidePosition++;
 		    	nakedSequence.append( c );
 		    }
 		}
+		
+		if( numberBuild != null )
+			throw new IllegalArgumentException( "Invalid peptide format. Got: " + peptideSequence );
+		
+		if( modMap.containsKey( 0 ) )
+			throw new IllegalArgumentException( "Invalid peptide format. Cannot start with a mod. Got: " + peptideSequence );
 		
 		ParsedPeptide pp = new ParsedPeptide();
 		pp.setModMap( modMap );
