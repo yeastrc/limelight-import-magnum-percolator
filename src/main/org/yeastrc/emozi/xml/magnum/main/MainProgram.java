@@ -40,10 +40,10 @@ public class MainProgram {
 		
 		CmdLineParser cmdLineParser = new CmdLineParser();
         
-		CmdLineParser.Option magnumParamOpt = cmdLineParser.addStringOption( 'p', "param" );	
+		CmdLineParser.Option magnumParamOpt = cmdLineParser.addStringOption( 'c', "config" );	
 		CmdLineParser.Option outfileOpt = cmdLineParser.addStringOption( 'o', "out" );	
 		CmdLineParser.Option magnumDataOpt = cmdLineParser.addStringOption( 'm', "magnum" );	
-		CmdLineParser.Option percolatorDataOpt = cmdLineParser.addStringOption( 'r', "percolator" );	
+		CmdLineParser.Option percolatorDataOpt = cmdLineParser.addStringOption( 'p', "percolator" );	
 		CmdLineParser.Option fastaFileOpt = cmdLineParser.addStringOption( 'f', "fasta" );
 
         // parse command line options
