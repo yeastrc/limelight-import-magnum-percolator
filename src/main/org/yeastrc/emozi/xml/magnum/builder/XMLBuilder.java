@@ -1,20 +1,13 @@
 package org.yeastrc.emozi.xml.magnum.builder;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 
 import org.yeastrc.emozi.emozi_import.api.xml_dto.ConfigurationFile;
 import org.yeastrc.emozi.emozi_import.api.xml_dto.ConfigurationFiles;
 import org.yeastrc.emozi.emozi_import.api.xml_dto.DefaultVisibleAnnotations;
-import org.yeastrc.emozi.emozi_import.api.xml_dto.DescriptivePsmAnnotationTypes;
 import org.yeastrc.emozi.emozi_import.api.xml_dto.EmoziInput;
 import org.yeastrc.emozi.emozi_import.api.xml_dto.FilterablePsmAnnotation;
 import org.yeastrc.emozi.emozi_import.api.xml_dto.FilterablePsmAnnotationType;
@@ -68,6 +61,9 @@ public class XMLBuilder {
 		EmoziInput emoziInputRoot = new EmoziInput();
 
 		emoziInputRoot.setFastaFilename( conversionParameters.getFastaFile().getName() );
+		
+		// add in the conversion program (this program) information
+		ConversionProgramBuilder.createInstance().buildConversionProgramSection( emoziInputRoot, conversionParameters);
 		
 		SearchProgramInfo searchProgramInfo = new SearchProgramInfo();
 		emoziInputRoot.setSearchProgramInfo( searchProgramInfo );
