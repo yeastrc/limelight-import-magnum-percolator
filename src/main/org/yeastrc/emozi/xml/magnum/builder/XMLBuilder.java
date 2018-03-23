@@ -241,7 +241,7 @@ public class XMLBuilder {
 
 					// see if this was a "search-for" modification, if not set "predicted" to true
 					if( ModParsingUtils.isPredictedMod( magnumParameters, parsedPeptide.getNakedSequence(), position, parsedPeptide.getModMap().get( position ) ) ) {							
-						xmlModification.setPredicted( "true" );							
+						xmlModification.setPredicted( true );							
 					}
 				}
 			}
