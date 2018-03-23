@@ -18,6 +18,7 @@
 
 package org.yeastrc.emozi.xml.magnum.annotation;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +54,6 @@ public class PSMAnnotationTypes {
 				type.setName( MAGNUM_ANNOTATION_TYPE_EVALUE );
 				type.setDescription( "Expect value" );
 				type.setFilterDirection( FilterDirectionType.BELOW );
-				type.setDefaultFilter( false );
 	
 				types.add( type );
 			}
@@ -63,7 +63,6 @@ public class PSMAnnotationTypes {
 				type.setName( MAGNUM_ANNOTATION_TYPE_SCORE );
 				type.setDescription( "Cross-correlation coefficient" );
 				type.setFilterDirection( FilterDirectionType.ABOVE );
-				type.setDefaultFilter( false );
 	
 				types.add( type );
 			}
@@ -72,7 +71,6 @@ public class PSMAnnotationTypes {
 				FilterablePsmAnnotationType type = new FilterablePsmAnnotationType();
 				type.setName( MAGNUM_ANNOTATION_TYPE_DSCORE );
 				type.setDescription( "Difference between the XCorr of this PSM and the next best PSM (with a dissimilar peptide)" );
-				type.setDefaultFilter( false );
 				type.setFilterDirection( FilterDirectionType.ABOVE );
 				
 				types.add( type );
@@ -82,7 +80,6 @@ public class PSMAnnotationTypes {
 				FilterablePsmAnnotationType type = new FilterablePsmAnnotationType();
 				type.setName( MAGNUM_ANNOTATION_TYPE_PPMERROR );
 				type.setDescription( "PPM Error, as calculated by " + Constants.PROGRAM_NAME_MAGNUM );
-				type.setDefaultFilter( false );
 				type.setFilterDirection( FilterDirectionType.ABOVE );
 				
 				types.add( type );
@@ -96,7 +93,7 @@ public class PSMAnnotationTypes {
 				type.setName( PERCOLATOR_ANNOTATION_TYPE_QVALUE );
 				type.setDescription( "Q-value" );
 				type.setFilterDirection( FilterDirectionType.BELOW );
-				type.setDefaultFilter( true );
+				type.setDefaultFilterValue( BigDecimal.valueOf( 0.05 ) );
 	
 				types.add( type );
 			}
@@ -106,7 +103,6 @@ public class PSMAnnotationTypes {
 				type.setName( PERCOLATOR_ANNOTATION_TYPE_PVALUE );
 				type.setDescription( "P-value" );
 				type.setFilterDirection( FilterDirectionType.BELOW );
-				type.setDefaultFilter( false );
 	
 				types.add( type );
 			}
@@ -116,7 +112,6 @@ public class PSMAnnotationTypes {
 				type.setName( PERCOLATOR_ANNOTATION_TYPE_PEP );
 				type.setDescription( "Posterior error probability" );
 				type.setFilterDirection( FilterDirectionType.BELOW );
-				type.setDefaultFilter( false );
 	
 				types.add( type );
 			}
@@ -126,7 +121,6 @@ public class PSMAnnotationTypes {
 				type.setName( PERCOLATOR_ANNOTATION_TYPE_SVMSCORE );
 				type.setDescription( "SVN Score from kernel function" );
 				type.setFilterDirection( FilterDirectionType.ABOVE );
-				type.setDefaultFilter( false );
 	
 				types.add( type );
 			}

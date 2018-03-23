@@ -18,6 +18,7 @@
 
 package org.yeastrc.emozi.xml.magnum.annotation;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +45,7 @@ public class PeptideAnnotationTypes {
 				type.setName( PERCOLATOR_ANNOTATION_TYPE_QVALUE );
 				type.setDescription( "Q-value" );
 				type.setFilterDirection( FilterDirectionType.BELOW );
-				type.setDefaultFilter( true );
+				type.setDefaultFilterValue( BigDecimal.valueOf( 0.05 ) );
 	
 				types.add( type );
 			}
@@ -54,7 +55,6 @@ public class PeptideAnnotationTypes {
 				type.setName( PERCOLATOR_ANNOTATION_TYPE_PVALUE );
 				type.setDescription( "P-value" );
 				type.setFilterDirection( FilterDirectionType.BELOW );
-				type.setDefaultFilter( false );
 	
 				types.add( type );
 			}
@@ -64,7 +64,6 @@ public class PeptideAnnotationTypes {
 				type.setName( PERCOLATOR_ANNOTATION_TYPE_PEP );
 				type.setDescription( "Posterior error probability" );
 				type.setFilterDirection( FilterDirectionType.BELOW );
-				type.setDefaultFilter( false );
 	
 				types.add( type );
 			}
@@ -74,7 +73,6 @@ public class PeptideAnnotationTypes {
 				type.setName( PERCOLATOR_ANNOTATION_TYPE_SVMSCORE );
 				type.setDescription( "SVN Score from kernel function" );
 				type.setFilterDirection( FilterDirectionType.ABOVE );
-				type.setDefaultFilter( false );
 	
 				types.add( type );
 			}
