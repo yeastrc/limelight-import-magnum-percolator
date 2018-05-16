@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 
+import org.yeastrc.emozi.emozi_import.api.xml_dto.AnnotationSortOrder;
 import org.yeastrc.emozi.emozi_import.api.xml_dto.ConfigurationFile;
 import org.yeastrc.emozi.emozi_import.api.xml_dto.ConfigurationFiles;
 import org.yeastrc.emozi.emozi_import.api.xml_dto.DefaultVisibleAnnotations;
@@ -20,9 +21,11 @@ import org.yeastrc.emozi.emozi_import.api.xml_dto.FilterableReportedPeptideAnnot
 import org.yeastrc.emozi.emozi_import.api.xml_dto.Modification;
 import org.yeastrc.emozi.emozi_import.api.xml_dto.Modifications;
 import org.yeastrc.emozi.emozi_import.api.xml_dto.Psm;
+import org.yeastrc.emozi.emozi_import.api.xml_dto.PsmAnnotationSortOrder;
 import org.yeastrc.emozi.emozi_import.api.xml_dto.Psms;
 import org.yeastrc.emozi.emozi_import.api.xml_dto.ReportedPeptide;
 import org.yeastrc.emozi.emozi_import.api.xml_dto.ReportedPeptide.ReportedPeptideAnnotations;
+import org.yeastrc.emozi.emozi_import.api.xml_dto.ReportedPeptideAnnotationSortOrder;
 import org.yeastrc.emozi.emozi_import.api.xml_dto.ReportedPeptides;
 import org.yeastrc.emozi.emozi_import.api.xml_dto.SearchAnnotation;
 import org.yeastrc.emozi.emozi_import.api.xml_dto.SearchProgram;
@@ -33,10 +36,14 @@ import org.yeastrc.emozi.emozi_import.api.xml_dto.SearchPrograms;
 import org.yeastrc.emozi.emozi_import.api.xml_dto.StaticModification;
 import org.yeastrc.emozi.emozi_import.api.xml_dto.StaticModifications;
 import org.yeastrc.emozi.emozi_import.api.xml_dto.VisiblePsmAnnotations;
+import org.yeastrc.emozi.emozi_import.api.xml_dto.VisibleReportedPeptideAnnotations;
 import org.yeastrc.emozi.emozi_import.create_import_file_from_java_objects.main.CreateImportFileFromJavaObjectsMain;
+import org.yeastrc.emozi.xml.magnum.annotation.PSMAnnotationTypeSortOrder;
 import org.yeastrc.emozi.xml.magnum.annotation.PSMAnnotationTypes;
 import org.yeastrc.emozi.xml.magnum.annotation.PSMDefaultVisibleAnnotationTypes;
+import org.yeastrc.emozi.xml.magnum.annotation.PeptideAnnotationTypeSortOrder;
 import org.yeastrc.emozi.xml.magnum.annotation.PeptideAnnotationTypes;
+import org.yeastrc.emozi.xml.magnum.annotation.PeptideDefaultVisibleAnnotationTypes;
 import org.yeastrc.emozi.xml.magnum.constants.Constants;
 import org.yeastrc.emozi.xml.magnum.objects.ConversionParameters;
 import org.yeastrc.emozi.xml.magnum.objects.MagnumPSM;
@@ -141,7 +148,33 @@ public class XMLBuilder {
 		for( SearchAnnotation sa : PSMDefaultVisibleAnnotationTypes.getDefaultVisibleAnnotationTypes() ) {
 			xmlVisiblePsmAnnotations.getSearchAnnotation().add( sa );
 		}
-				
+
+		VisibleReportedPeptideAnnotations xmlVisibleReportedPeptideAnnotations = new VisibleReportedPeptideAnnotations();
+		xmlDefaultVisibleAnnotations.setVisibleReportedPeptideAnnotations( xmlVisibleReportedPeptideAnnotations );
+
+		for( SearchAnnotation sa : PeptideDefaultVisibleAnnotationTypes.getDefaultVisibleAnnotationTypes() ) {
+			xmlVisibleReportedPeptideAnnotations.getSearchAnnotation().add( sa );
+		}
+		
+		//
+		// Define the default display order in proxl
+		//
+		AnnotationSortOrder xmlAnnotationSortOrder = new AnnotationSortOrder();
+		searchProgramInfo.setAnnotationSortOrder( xmlAnnotationSortOrder );
+		
+		PsmAnnotationSortOrder xmlPsmAnnotationSortOrder = new PsmAnnotationSortOrder();
+		xmlAnnotationSortOrder.setPsmAnnotationSortOrder( xmlPsmAnnotationSortOrder );
+		
+		for( SearchAnnotation xmlSearchAnnotation : PSMAnnotationTypeSortOrder.getPSMAnnotationTypeSortOrder() ) {
+			xmlPsmAnnotationSortOrder.getSearchAnnotation().add( xmlSearchAnnotation );
+		}
+		
+		ReportedPeptideAnnotationSortOrder xmlReportedPeptideAnnotationSortOrder = new ReportedPeptideAnnotationSortOrder();
+		xmlAnnotationSortOrder.setReportedPeptideAnnotationSortOrder( xmlReportedPeptideAnnotationSortOrder );
+		
+		for( SearchAnnotation xmlSearchAnnotation : PeptideAnnotationTypeSortOrder.getPeptideAnnotationTypeSortOrder() ) {
+			xmlReportedPeptideAnnotationSortOrder.getSearchAnnotation().add( xmlSearchAnnotation );
+		}
 
 		
 		//

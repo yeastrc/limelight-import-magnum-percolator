@@ -39,6 +39,13 @@ public class PeptideDefaultVisibleAnnotationTypes {
 			annotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
 			annotations.add( annotation );
 		}
+
+		{
+			SearchAnnotation annotation = new SearchAnnotation();
+			annotation.setAnnotationName( PeptideAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_PEP );
+			annotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
+			annotations.add( annotation );
+		}
 		
 		return annotations;
 	}
