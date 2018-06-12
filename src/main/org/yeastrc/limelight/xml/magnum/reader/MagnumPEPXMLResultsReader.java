@@ -18,6 +18,7 @@ import org.yeastrc.limelight.xml.magnum.constants.MagnumConstants;
 import org.yeastrc.limelight.xml.magnum.objects.MagnumPSM;
 import org.yeastrc.limelight.xml.magnum.objects.MagnumParameters;
 import org.yeastrc.limelight.xml.magnum.objects.MagnumResults;
+import org.yeastrc.limelight.xml.magnum.utils.ModParsingUtils;
 
 import net.systemsbiology.regis_web.pepxml.ModInfoDataType;
 import net.systemsbiology.regis_web.pepxml.ModInfoDataType.ModAminoacidMass;
@@ -40,7 +41,7 @@ public class MagnumPEPXMLResultsReader {
 	 */
 	public static MagnumResults getMagnumResults( File pepXMLFile, MagnumParameters params ) throws Throwable {
 
-		Map<Integer,Collection<MagnumPSM>> resultMap = new HashMap<>();
+		Map<String,Map<Integer,Collection<MagnumPSM>>> resultMap = new HashMap<>();
 		
 		System.err.println( params );
 		
@@ -80,10 +81,15 @@ public class MagnumPEPXMLResultsReader {
 							
 						}
 						
-						if( !resultMap.containsKey( scanNumber ) )
-							resultMap.put( scanNumber, new HashSet<>() );
+						String psmReportedPeptide = ModParsingUtils.getRoundedReportedPeptideString( psm );
 						
-						resultMap.get( scanNumber ).add( psm );
+						if( !results.getMagnumResultMap().containsKey( psmReportedPeptide ) )
+							results.getMagnumResultMap().put( psmReportedPeptide, new HashMap<>() );
+						
+						if( !results.getMagnumResultMap().get( psmReportedPeptide ).containsKey( scanNumber ) )
+							results.getMagnumResultMap().get( psmReportedPeptide ).put( scanNumber, new HashSet<>() );
+						
+						results.getMagnumResultMap().get( psmReportedPeptide ).get( scanNumber ).add( psm );						
 					}
 				}
 			}
