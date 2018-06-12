@@ -18,6 +18,7 @@
 
 package org.yeastrc.limelight.xml.magnum.utils;
 
+import org.yeastrc.limelight.xml.magnum.objects.MagnumPSM;
 import org.yeastrc.limelight.xml.magnum.objects.MagnumResults;
 import org.yeastrc.limelight.xml.magnum.objects.PercolatorPeptide;
 import org.yeastrc.limelight.xml.magnum.objects.PercolatorResults;
@@ -39,22 +40,62 @@ public class DataComparer {
 			
 			String reportedPeptideString = percolatorPeptide.getReportedPeptide();
 			
-			// check that magnum also reported this reported peptide
-			if( !magnumResults.getMagnumResultMap().containsKey( reportedPeptideString ) )
-				throw new Exception( "Could not find any magnum entry for reported peptide: " + reportedPeptideString );
-		
 			/*
 			 * check that all scan numbers reported for this reported peptide by percolator were
 			 * also reported for this reported peptide by magnum
 			 */
 			for( int scanNumber : percolatorResults.getReportedPeptidePSMMap().get( percolatorPeptide ).keySet() ) {
 				
-				if( !magnumResults.getMagnumResultMap().get( reportedPeptideString ).containsKey( scanNumber ) )
-					throw new Exception( "Could not find a magnum PSM for reported peptide: " + reportedPeptideString + ", scan number: " + scanNumber );
+				if( !magnumResultsContainUnambiguousPSMMatch( magnumResults, percolatorPeptide, scanNumber ) )
+					throw new Exception( "Could not find single magnum PSM for reported peptide: " + reportedPeptideString + ", scan number: " + scanNumber );
 				
 			}
 			
 		}		
+	}
+	
+	/**
+	 * Return true if the magnum results contain a single PSM for the given scan number that would match
+	 * the given percolator reported peptide, when rounding all mod masses to integers.
+	 * 
+	 * @param magnumResults
+	 * @param percPeptide
+	 * @param scanNumber
+	 * @return
+	 * @throws Exception 
+	 */
+	private static boolean magnumResultsContainUnambiguousPSMMatch( MagnumResults magnumResults, PercolatorPeptide percPeptide, int scanNumber ) throws Exception {
+		
+		if( !magnumResults.getMagnumResultMap().containsKey( scanNumber ) )
+			return false;
+		
+		if( magnumResults.getMagnumResultMap().get( scanNumber ).size() == 0 ) {
+			return false;
+		}
+
+		String percRP = ModParsingUtils.getRoundedReportedPeptideString( percPeptide );
+
+		int numMatches = 0;
+		for( MagnumPSM psm : magnumResults.getMagnumResultMap().get( scanNumber ) ) {
+			
+			String magRP = ModParsingUtils.getRoundedReportedPeptideString( psm );
+			
+			if( percRP.equals( magRP ) ) {
+				System.out.println( psm );
+				numMatches++;
+			}
+		}
+		
+		if( numMatches == 1 ) {
+			return true;
+		}
+		
+		
+		if( numMatches > 1 ) {
+			throw new Exception( "Found more than one magnum PSM with scan number " + scanNumber + " that matches reported peptide: " + percRP );
+		}
+		
+		return false;
 	}
 	
 }

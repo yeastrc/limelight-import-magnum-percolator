@@ -274,10 +274,7 @@ public class XMLBuilder {
 					xmlModification.setMass( BigDecimal.valueOf( parsedPeptide.getModMap().get( position ) ) );
 					xmlModification.setPosition( new BigInteger( String.valueOf( position ) ) );
 
-					// see if this was a "search-for" modification, if not set "predicted" to true
-					if( ModParsingUtils.isPredictedMod( magnumParameters, parsedPeptide.getNakedSequence(), position, parsedPeptide.getModMap().get( position ) ) ) {							
-						xmlModification.setHavePsmLevelData( true );						
-					}
+					xmlModification.setHavePsmLevelData( true ); // assume all mods have psm-level data for magnum/perc data
 				}
 			}
 
@@ -290,7 +287,7 @@ public class XMLBuilder {
 			for( int scanNumber : percolatorResults.getReportedPeptidePSMMap().get( percolatorPeptide ).keySet() ) {
 				
 				PercolatorPSM percolatorPSM = percolatorResults.getReportedPeptidePSMMap().get( percolatorPeptide ).get( scanNumber );
-				MagnumPSM magnumPSM = magnumResults.getMagnumResultMap().get( percolatorPeptide.getReportedPeptide() ).get( scanNumber );
+				MagnumPSM magnumPSM = getMagnumPSMForScanNumberAndPercolatorReportedPeptide( scanNumber, percolatorPeptide, magnumResults );
 				
 				Psm xmlPsm = new Psm();
 				xmlPsms.getPsm().add( xmlPsm );
@@ -418,6 +415,22 @@ public class XMLBuilder {
 		//make the xml file
 		CreateImportFileFromJavaObjectsMain.getInstance().createImportFileFromJavaObjectsMain( conversionParameters.getLimelightXMLOutputFile(), limelightInputRoot);
 		
+	}
+	
+	
+	private MagnumPSM getMagnumPSMForScanNumberAndPercolatorReportedPeptide( int scanNumber, PercolatorPeptide percolatorPeptide, MagnumResults magnumResults ) throws Exception {
+		
+		if( magnumResults.getMagnumResultMap() == null || !magnumResults.getMagnumResultMap().containsKey( scanNumber ) )
+			throw new Exception( "Had no magnum results for scan number: " + scanNumber );
+		
+		String percRP = ModParsingUtils.getRoundedReportedPeptideString( percolatorPeptide );
+		
+		for( MagnumPSM psm : magnumResults.getMagnumResultMap().get( scanNumber ) ) {
+			if( percRP.equals( ModParsingUtils.getRoundedReportedPeptideString( psm ) ) )
+				return psm;
+		}
+		
+		throw new Exception( "Could not find a PSM in Magnum results for scanNumber: " + scanNumber + " and reported peptide: " + percolatorPeptide.getReportedPeptide() );
 	}
 	
 }

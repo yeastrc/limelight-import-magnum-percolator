@@ -22,6 +22,18 @@ import java.util.Map;
 
 public class MagnumPSM {
 	
+	
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "MagnumPSM [retentionTime=" + retentionTime + ", scanNumber=" + scanNumber + ", charge=" + charge
+				+ ", reportedPeptide=" + reportedPeptide + ", observedMass=" + observedMass + ", ppmError=" + ppmError
+				+ ", eValue=" + eValue + ", score=" + score + ", dScore=" + dScore + ", peptideSequence="
+				+ peptideSequence + ", modifications=" + modifications + "]";
+	}
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */

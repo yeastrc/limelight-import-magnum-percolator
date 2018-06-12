@@ -22,6 +22,35 @@ import java.util.Map;
 
 public class MagnumParameters {
 
+	@Override
+	public String toString() {
+
+		String str = "MagnumParameters: ";
+		
+		if( this.staticMods != null ) {
+			str += " Static mods: [";
+			for( char r : this.staticMods.keySet() ) {
+				str += "(";
+				str += r + "," + this.staticMods.get( r );
+				str += ")";
+			}
+			str += "]";
+		}
+		
+		if( this.dynamicMods != null ) {
+			str += " Dynamic mods: [";
+			for( char r : this.dynamicMods.keySet() ) {
+				str += "(";
+				str += r + "," + this.dynamicMods.get( r );
+				str += ")";
+			}
+			str += "]";
+		}
+
+		return str;
+		
+	}
+	
 	/**
 	 * @return the dynamicMods
 	 */

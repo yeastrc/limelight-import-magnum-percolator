@@ -3,6 +3,9 @@ package org.yeastrc.limelight.xml.magnum.reader;
 import static java.lang.Math.toIntExact;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,7 +40,9 @@ public class MagnumPEPXMLResultsReader {
 	 */
 	public static MagnumResults getMagnumResults( File pepXMLFile, MagnumParameters params ) throws Throwable {
 
-		Map<String, Map<Integer,MagnumPSM>> resultMap = new HashMap<>();
+		Map<Integer,Collection<MagnumPSM>> resultMap = new HashMap<>();
+		
+		System.err.println( params );
 		
 		MsmsPipelineAnalysis msAnalysis = null;
 		try {
@@ -75,65 +80,16 @@ public class MagnumPEPXMLResultsReader {
 							
 						}
 						
-						String reportedPeptideString = getRoundedReportedPeptideStringForPSM( psm, params );
+						if( !resultMap.containsKey( scanNumber ) )
+							resultMap.put( scanNumber, new HashSet<>() );
 						
-						if( !resultMap.containsKey( reportedPeptideString ) )
-							resultMap.put( reportedPeptideString, new HashMap<>() );
-						
-						resultMap.get( reportedPeptideString ).put( psm.getScanNumber(), psm );								
+						resultMap.get( scanNumber ).add( psm );
 					}
 				}
 			}
 		}
 		
 		return results;
-	}
-	
-	private static String getRoundedReportedPeptideStringForPSM( MagnumPSM psm, MagnumParameters params ) {
-		
-		if( psm.getModifications() == null && psm.getModifications().size() < 1 )
-			return psm.getPeptideSequence();
-		
-		StringBuilder sb = new StringBuilder();
-		
-		for (int i = 0; i < psm.getPeptideSequence().length(); i++){
-		    String r = String.valueOf( psm.getPeptideSequence().charAt(i) );
-		    sb.append( r );
-		    
-		    if( psm.getModifications().containsKey( i + 1 ) ) {
-
-		    	double mass = psm.getModifications().get( i + 1 );
-		    	
-		    	sb.append( "[" );
-		    	
-		    	if( paramsContainDynamicMod( r, mass, params ) ) {
-
-		    		// this was a searched-for dynamic mod, put in exact value
-		    		sb.append( mass );
-		    	} else {
-		    		
-		    		// this was a discovered open mod mass, put in rounded values
-		    		sb.append( Math.toIntExact( Math.round( mass ) ) );
-		    	}
-		    			    	
-		    	sb.append( "]" );
-		    	
-		    }
-		    
-		}
-		
-		return sb.toString();
-		
-	}
-	
-	private static boolean paramsContainDynamicMod( String aminoAcid, Double mass, MagnumParameters params ) {
-		
-		if( params.getDynamicMods() != null &&
-				params.getDynamicMods().containsKey( aminoAcid ) &&
-				params.getDynamicMods().get( aminoAcid ).equals( mass ) )
-			return true;
-		
-		return false;
 	}
 	
 	private static String getMagnumVersionFromXML( MsmsPipelineAnalysis msAnalysis ) {
@@ -219,10 +175,9 @@ public class MagnumPEPXMLResultsReader {
 	}
 	
 	private static Double getScoreForType( SearchHit searchHit, String type ) throws Throwable {
-		
+				
 		for( NameValueType searchScore : searchHit.getSearchScore() ) {
-			if( searchScore.getType().equals( "search_score" ) &&
-				searchScore.getName().equals( type ) ) {
+			if( searchScore.getName().equals( type ) ) {
 				
 				return Double.valueOf( searchScore.getValueAttribute() );
 			}

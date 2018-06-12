@@ -41,19 +41,19 @@ public class MagnumResults {
 	/**
 	 * @return the magnumResultMap
 	 */
-	public Map<String, Map<Integer,MagnumPSM>> getMagnumResultMap() {
+	public Map<Integer, Collection<MagnumPSM>> getMagnumResultMap() {
 		return magnumResultMap;
 	}
 	/**
 	 * @param magnumResultMap the magnumResultMap to set
 	 */
-	public void setMagnumResultMap(Map<String, Map<Integer,MagnumPSM>> magnumResultMap) {
+	public void setMagnumResultMap(Map<Integer, Collection<MagnumPSM>> magnumResultMap) {
 		this.magnumResultMap = magnumResultMap;
 	}
 
 
 
 	private String magnumVersion;
-	private Map<String, Map<Integer,MagnumPSM>> magnumResultMap;
+	private Map<Integer,Collection<MagnumPSM>> magnumResultMap;
 	
 }
