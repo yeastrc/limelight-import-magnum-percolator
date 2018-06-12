@@ -287,108 +287,129 @@ public class XMLBuilder {
 			// iterate over all PSMs for this reported peptide
 			for( int scanNumber : percolatorResults.getReportedPeptidePSMMap().get( percolatorPeptide ).keySet() ) {
 				
-				PercolatorPSM percolatorPSM = percolatorResults.getReportedPeptidePSMMap().get( percolatorPeptide ).get( scanNumber );
 				Collection<MagnumPSM> magnumPSMs = magnumResults.getMagnumResultMap().get( percolatorPeptide ).get( scanNumber );
+
+				/*
+				 * PSMs listed by percolator cannot be reliably matched to specific PSMs listed by Magnum.
+				 * 
+				 * This is because Magnum may list multiple PSMs for the same scan that have very slightly different mod
+				 * masses (one from open mod, one from variable mod) on the same peptide position. When converted to ints
+				 * for obtaining peptide-level scoring in percolator, both PSMs are listed as PSMs for that aggregate peptide,
+				 * and they are listed by scan number.
+				 * 
+				 * Since scan number is ambiguous (multiple PSMs for same scan number), these cannot be mapped reliably on
+				 * a specific PSM in the magnum data. So, in an effort to not toss data out, we are allowing more than one
+				 * percolator PSM for a given scan number for a given peptide match--and we are allowing more than one
+				 * magnum PSM for a given scan number for the same peptide match. Since we can't tell exactly which goes with
+				 * which, we will have a PSM entry for all combinations of percolator and magnum PSMs for this peptide and scan
+				 * number.
+				 * 
+				 * So, if there are two magnum PSMs for this scan number for this percolator reported peptide, this will
+				 * result in 4 PSMs in the limelight XML file (2 percolator PSMs * 2 magnum PSMs). Ideally Magnum would
+				 * not list multiple PSMs for the same scan number for the same peptide match--and if that is changed
+				 * in the future, this code will not need changing.
+				 * 
+				 */
 				
-				// it is assumed that if there are multiple magnum PSMs for this scan number that match this
-				// reported peptide, that they all have identical scores--and so have identical percolator
-				// statistics.  It is also assumed that percolator will only ever list the same scan number for the same
-				// reported peptide once.
-				for( MagnumPSM magnumPSM : magnumPSMs ) {
 				
-					Psm xmlPsm = new Psm();
-					xmlPsms.getPsm().add( xmlPsm );
+				for( PercolatorPSM percolatorPSM : percolatorResults.getReportedPeptidePSMMap().get( percolatorPeptide ).get( scanNumber ) ) {
 					
-					xmlPsm.setScanNumber( new BigInteger( String.valueOf( scanNumber ) ) );
-					xmlPsm.setPrecursorCharge( new BigInteger( String.valueOf( magnumPSM.getCharge() ) ) );
+					for( MagnumPSM magnumPSM : magnumPSMs ) {
 					
-					// add in the filterable PSM annotations (e.g., score)
-					FilterablePsmAnnotations xmlFilterablePsmAnnotations = new FilterablePsmAnnotations();
-					xmlPsm.setFilterablePsmAnnotations( xmlFilterablePsmAnnotations );
-					
-					// handle magnum scores
-					{
-						FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
-						xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
+						Psm xmlPsm = new Psm();
+						xmlPsms.getPsm().add( xmlPsm );
 						
-						xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_EVALUE );
-						xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_MAGNUM );
-						xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( magnumPSM.geteValue()) );
-					}
-					{
-						FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
-						xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
+						xmlPsm.setScanNumber( new BigInteger( String.valueOf( scanNumber ) ) );
+						xmlPsm.setPrecursorCharge( new BigInteger( String.valueOf( magnumPSM.getCharge() ) ) );
 						
-						xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_SCORE );
-						xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_MAGNUM );
-						xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( magnumPSM.getScore()) );
-					}
-					{
-						FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
-						xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
+						// add in the filterable PSM annotations (e.g., score)
+						FilterablePsmAnnotations xmlFilterablePsmAnnotations = new FilterablePsmAnnotations();
+						xmlPsm.setFilterablePsmAnnotations( xmlFilterablePsmAnnotations );
 						
-						xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_DSCORE );
-						xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_MAGNUM );
-						xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( magnumPSM.getdScore() ) );
-					}
-					{
-						FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
-						xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
-						
-						xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_PPMERROR );
-						xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_MAGNUM );
-						xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( magnumPSM.getPpmError()) );
-					}
-	
-					
-					
-					// handle percolator scores
-					{
-						FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
-						xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
-						
-						xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_PEP );
-						xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
-						xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( percolatorPSM.getPep() ) );
-					}
-					{
-						FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
-						xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
-						
-						xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_PVALUE );
-						xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
-						xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( percolatorPSM.getpValue() ) );
-					}
-					{
-						FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
-						xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
-						
-						xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_QVALUE );
-						xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
-						xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( percolatorPSM.getqValue() ) );
-					}
-					{
-						FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
-						xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
-						
-						xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_SVMSCORE );
-						xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
-						xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( percolatorPSM.getSvmScore() ) );
-					}
-					
-					
-					// add in the mods for this psm
-					if( magnumPSM.getModifications() != null && magnumPSM.getModifications().keySet().size() > 0 ) {
+						// handle magnum scores
+						{
+							FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
+							xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
 							
-						PsmModifications xmlPSMModifications = new PsmModifications();
-						xmlPsm.setPsmModifications( xmlPSMModifications );
+							xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_EVALUE );
+							xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_MAGNUM );
+							xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( magnumPSM.geteValue()) );
+						}
+						{
+							FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
+							xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
 							
-						for( int position : magnumPSM.getModifications().keySet() ) {
-							PsmModification xmlPSMModification = new PsmModification();
-							xmlPSMModifications.getPsmModification().add( xmlPSMModification );
-									
-							xmlPSMModification.setMass( BigDecimal.valueOf( magnumPSM.getModifications().get( position ) ) );
-							xmlPSMModification.setPosition( new BigInteger( String.valueOf( position ) ) );
+							xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_SCORE );
+							xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_MAGNUM );
+							xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( magnumPSM.getScore()) );
+						}
+						{
+							FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
+							xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
+							
+							xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_DSCORE );
+							xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_MAGNUM );
+							xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( magnumPSM.getdScore() ) );
+						}
+						{
+							FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
+							xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
+							
+							xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_PPMERROR );
+							xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_MAGNUM );
+							xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( magnumPSM.getPpmError()) );
+						}
+		
+						
+						
+						// handle percolator scores
+						{
+							FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
+							xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
+							
+							xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_PEP );
+							xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
+							xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( percolatorPSM.getPep() ) );
+						}
+						{
+							FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
+							xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
+							
+							xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_PVALUE );
+							xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
+							xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( percolatorPSM.getpValue() ) );
+						}
+						{
+							FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
+							xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
+							
+							xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_QVALUE );
+							xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
+							xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( percolatorPSM.getqValue() ) );
+						}
+						{
+							FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
+							xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
+							
+							xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_SVMSCORE );
+							xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
+							xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( percolatorPSM.getSvmScore() ) );
+						}
+						
+						
+						// add in the mods for this psm
+						if( magnumPSM.getModifications() != null && magnumPSM.getModifications().keySet().size() > 0 ) {
+								
+							PsmModifications xmlPSMModifications = new PsmModifications();
+							xmlPsm.setPsmModifications( xmlPSMModifications );
+								
+							for( int position : magnumPSM.getModifications().keySet() ) {
+								PsmModification xmlPSMModification = new PsmModification();
+								xmlPSMModifications.getPsmModification().add( xmlPSMModification );
+										
+								xmlPSMModification.setMass( BigDecimal.valueOf( magnumPSM.getModifications().get( position ) ) );
+								xmlPSMModification.setPosition( new BigInteger( String.valueOf( position ) ) );
+							}
 						}
 					}
 				}
