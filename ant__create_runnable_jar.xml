@@ -6,7 +6,7 @@
 		
 	<property name="java.source.character.set" value="iso-8859-1"/>
 
-	<property name="jar.main.class" value="org.yeastrc.emozi.xml.magnum.main.MainProgram" />
+	<property name="jar.main.class" value="org.yeastrc.limelight.xml.magnum.main.MainProgram" />
 
 	<property name="output_runnable_jar" value="magnumToLimelightXML.jar"/>
 

@@ -1,10 +1,10 @@
-Description: Convert the results of a Magnum + Percolator analysis to an emozi
-             XML file suitable for import into emozi.
+Description: Convert the results of a Magnum + Percolator analysis to an limelight
+             XML file suitable for import into limelight.
 
-Usage: java -jar magnum2EmoziXML.jar -c path -o path -m path -p path -f path
+Usage: java -jar magnum2LimelightXML.jar -c path -o path -m path -p path -f path
 
-Example: java -jar magnum2EmoziXML.jar -c /path/to/magnum.conf
-                                       -o ./magnum.emozi.xml
+Example: java -jar magnum2LimelightXML.jar -c /path/to/magnum.conf
+                                       -o ./magnum.limelight.xml
                                        -m /path/to/magnum.txt
                                        -p /path/to/percolator-out.xml
                                        -f /path/to/fasta.fa
@@ -12,7 +12,7 @@ Example: java -jar magnum2EmoziXML.jar -c /path/to/magnum.conf
 
 Options:
 	-c	[Required] Full path to Magnum .conf file
-	-o	[Required] Full path to use for the emozi XML output file
+	-o	[Required] Full path to use for the limelight XML output file
 	-f	[Required] Full path to FASTA file used in the experiment.
 	-m	[Required] Full path to Magnum results (.txt) file
 	-p	[Required] Full path to Percolator output XML file

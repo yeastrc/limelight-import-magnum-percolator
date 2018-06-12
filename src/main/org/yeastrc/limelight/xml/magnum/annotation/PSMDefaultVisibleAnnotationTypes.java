@@ -53,13 +53,6 @@ public class PSMDefaultVisibleAnnotationTypes {
 			annotation.setSearchProgram( Constants.PROGRAM_NAME_MAGNUM );
 			annotations.add( annotation );
 		}
-		
-		{
-			SearchAnnotation annotation = new SearchAnnotation();
-			annotation.setAnnotationName( PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_MODMASS );
-			annotation.setSearchProgram( Constants.PROGRAM_NAME_MAGNUM );
-			annotations.add( annotation );
-		}
 
 		return annotations;
 	}

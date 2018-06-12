@@ -22,6 +22,8 @@ import org.yeastrc.limelight.limelight_import.api.xml_dto.PeptideModification;
 import org.yeastrc.limelight.limelight_import.api.xml_dto.PeptideModifications;
 import org.yeastrc.limelight.limelight_import.api.xml_dto.Psm;
 import org.yeastrc.limelight.limelight_import.api.xml_dto.PsmAnnotationSortOrder;
+import org.yeastrc.limelight.limelight_import.api.xml_dto.PsmModification;
+import org.yeastrc.limelight.limelight_import.api.xml_dto.PsmModifications;
 import org.yeastrc.limelight.limelight_import.api.xml_dto.Psms;
 import org.yeastrc.limelight.limelight_import.api.xml_dto.ReportedPeptide;
 import org.yeastrc.limelight.limelight_import.api.xml_dto.ReportedPeptide.ReportedPeptideAnnotations;
@@ -288,7 +290,7 @@ public class XMLBuilder {
 			for( int scanNumber : percolatorResults.getReportedPeptidePSMMap().get( percolatorPeptide ).keySet() ) {
 				
 				PercolatorPSM percolatorPSM = percolatorResults.getReportedPeptidePSMMap().get( percolatorPeptide ).get( scanNumber );
-				MagnumPSM magnumPSM = magnumResults.getReportedPeptidePSMMap().get( percolatorPeptide.getReportedPeptide() ).get( scanNumber );
+				MagnumPSM magnumPSM = magnumResults.getMagnumResultMap().get( percolatorPeptide.getReportedPeptide() ).get( scanNumber );
 				
 				Psm xmlPsm = new Psm();
 				xmlPsms.getPsm().add( xmlPsm );
@@ -333,6 +335,7 @@ public class XMLBuilder {
 					xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_MAGNUM );
 					xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( magnumPSM.getPpmError()) );
 				}
+
 				
 				
 				// handle percolator scores
@@ -367,6 +370,22 @@ public class XMLBuilder {
 					xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_SVMSCORE );
 					xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
 					xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( percolatorPSM.getSvmScore() ) );
+				}
+				
+				
+				// add in the mods for this psm
+				if( magnumPSM.getModifications() != null && magnumPSM.getModifications().keySet().size() > 0 ) {
+						
+					PsmModifications xmlPSMModifications = new PsmModifications();
+					xmlPsm.setPsmModifications( xmlPSMModifications );
+						
+					for( int position : magnumPSM.getModifications().keySet() ) {
+						PsmModification xmlPSMModification = new PsmModification();
+						xmlPSMModifications.getPsmModification().add( xmlPSMModification );
+								
+						xmlPSMModification.setMass( BigDecimal.valueOf( magnumPSM.getModifications().get( position ) ) );
+						xmlPSMModification.setPosition( new BigInteger( String.valueOf( position ) ) );
+					}
 				}
 				
 			}//end iterating over all PSMs for a reported peptide
