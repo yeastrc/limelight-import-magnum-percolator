@@ -18,6 +18,7 @@
 
 package org.yeastrc.limelight.xml.magnum.objects;
 
+import java.util.Collection;
 import java.util.Map;
 
 public class MagnumResults {
@@ -34,22 +35,25 @@ public class MagnumResults {
 	public void setMagnumVersion(String magnumVersion) {
 		this.magnumVersion = magnumVersion;
 	}
+
+
+
 	/**
-	 * @return the reportedPeptidePSMMap
+	 * @return the magnumResultMap
 	 */
-	public Map<String, Map<Integer, MagnumPSM>> getReportedPeptidePSMMap() {
-		return reportedPeptidePSMMap;
+	public Map<String, Map<Integer,MagnumPSM>> getMagnumResultMap() {
+		return magnumResultMap;
 	}
 	/**
-	 * @param reportedPeptidePSMMap the reportedPeptidePSMMap to set
+	 * @param magnumResultMap the magnumResultMap to set
 	 */
-	public void setReportedPeptidePSMMap(Map<String, Map<Integer, MagnumPSM>> reportedPeptidePSMMap) {
-		this.reportedPeptidePSMMap = reportedPeptidePSMMap;
+	public void setMagnumResultMap(Map<String, Map<Integer,MagnumPSM>> magnumResultMap) {
+		this.magnumResultMap = magnumResultMap;
 	}
-	
-	public String magnumVersion;
-	
-	// map of reported peptide to scan numbers to psm (a reported peptde + scan number is unique)
-	public Map<String, Map<Integer, MagnumPSM>> reportedPeptidePSMMap;
+
+
+
+	private String magnumVersion;
+	private Map<String, Map<Integer,MagnumPSM>> magnumResultMap;
 	
 }

@@ -24,7 +24,7 @@ import org.yeastrc.limelight.xml.magnum.objects.MagnumParameters;
 import org.yeastrc.limelight.xml.magnum.objects.MagnumResults;
 import org.yeastrc.limelight.xml.magnum.objects.PercolatorResults;
 import org.yeastrc.limelight.xml.magnum.reader.MagnumParamsReader;
-import org.yeastrc.limelight.xml.magnum.reader.MagnumTextResultsReader;
+import org.yeastrc.limelight.xml.magnum.reader.MagnumPEPXMLResultsReader;
 import org.yeastrc.limelight.xml.magnum.reader.PercolatorResultsReader;
 import org.yeastrc.limelight.xml.magnum.utils.DataComparer;
 
@@ -42,7 +42,7 @@ public class ConverterRunner {
 		
 		
 		System.err.print( "Reading Magnum data into memory..." );
-		MagnumResults magnumResults = MagnumTextResultsReader.getMagnumResults( conversionParameters.getMagnumOutputFile() );
+		MagnumResults magnumResults = MagnumPEPXMLResultsReader.getMagnumResults( conversionParameters.getMagnumOutputFile(), magParams );
 		System.err.println( " Done." );
 		
 		

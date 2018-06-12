@@ -40,7 +40,7 @@ public class DataComparer {
 			String reportedPeptideString = percolatorPeptide.getReportedPeptide();
 			
 			// check that magnum also reported this reported peptide
-			if( !magnumResults.getReportedPeptidePSMMap().containsKey( reportedPeptideString ) )
+			if( !magnumResults.getMagnumResultMap().containsKey( reportedPeptideString ) )
 				throw new Exception( "Could not find any magnum entry for reported peptide: " + reportedPeptideString );
 		
 			/*
@@ -49,7 +49,7 @@ public class DataComparer {
 			 */
 			for( int scanNumber : percolatorResults.getReportedPeptidePSMMap().get( percolatorPeptide ).keySet() ) {
 				
-				if( !magnumResults.getReportedPeptidePSMMap().get( reportedPeptideString ).containsKey( scanNumber ) )
+				if( !magnumResults.getMagnumResultMap().get( reportedPeptideString ).containsKey( scanNumber ) )
 					throw new Exception( "Could not find a magnum PSM for reported peptide: " + reportedPeptideString + ", scan number: " + scanNumber );
 				
 			}

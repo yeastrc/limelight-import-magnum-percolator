@@ -30,11 +30,12 @@ import org.yeastrc.limelight.xml.magnum.constants.Constants;
 
 public class PSMAnnotationTypes {
 
-	// comet scores
+	// magnum scores
 	public static final String MAGNUM_ANNOTATION_TYPE_EVALUE = "E-Value";
 	public static final String MAGNUM_ANNOTATION_TYPE_SCORE = "Score";
 	public static final String MAGNUM_ANNOTATION_TYPE_DSCORE = "dScore";
 	public static final String MAGNUM_ANNOTATION_TYPE_PPMERROR = "PPM Error";
+	public static final String MAGNUM_ANNOTATION_TYPE_MODMASS = "Mod Mass";
 
 	// percolator scores
 	public static final String PERCOLATOR_ANNOTATION_TYPE_QVALUE = "q-value";
@@ -80,6 +81,15 @@ public class PSMAnnotationTypes {
 				FilterablePsmAnnotationType type = new FilterablePsmAnnotationType();
 				type.setName( MAGNUM_ANNOTATION_TYPE_PPMERROR );
 				type.setDescription( "PPM Error, as calculated by " + Constants.PROGRAM_NAME_MAGNUM );
+				type.setFilterDirection( FilterDirectionType.ABOVE );
+				
+				types.add( type );
+			}
+			
+			{
+				FilterablePsmAnnotationType type = new FilterablePsmAnnotationType();
+				type.setName( MAGNUM_ANNOTATION_TYPE_MODMASS );
+				type.setDescription( "Modification mass, as calculated by " + Constants.PROGRAM_NAME_MAGNUM );
 				type.setFilterDirection( FilterDirectionType.ABOVE );
 				
 				types.add( type );

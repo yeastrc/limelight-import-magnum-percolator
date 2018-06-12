@@ -18,6 +18,8 @@
 
 package org.yeastrc.limelight.xml.magnum.objects;
 
+import java.util.Map;
+
 public class MagnumPSM {
 	
 	/* (non-Javadoc)
@@ -27,11 +29,26 @@ public class MagnumPSM {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + charge;
+		long temp;
+		temp = Double.doubleToLongBits(dScore);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(eValue);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + ((modifications == null) ? 0 : modifications.hashCode());
+		temp = Double.doubleToLongBits(observedMass);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + ((peptideSequence == null) ? 0 : peptideSequence.hashCode());
+		temp = Double.doubleToLongBits(ppmError);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + ((reportedPeptide == null) ? 0 : reportedPeptide.hashCode());
+		temp = Double.doubleToLongBits(retentionTime);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + scanNumber;
+		temp = Double.doubleToLongBits(score);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
 		return result;
 	}
-	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -41,15 +58,39 @@ public class MagnumPSM {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
+		if (!(obj instanceof MagnumPSM))
 			return false;
 		MagnumPSM other = (MagnumPSM) obj;
+		if (charge != other.charge)
+			return false;
+		if (Double.doubleToLongBits(dScore) != Double.doubleToLongBits(other.dScore))
+			return false;
+		if (Double.doubleToLongBits(eValue) != Double.doubleToLongBits(other.eValue))
+			return false;
+		if (modifications == null) {
+			if (other.modifications != null)
+				return false;
+		} else if (!modifications.equals(other.modifications))
+			return false;
+		if (Double.doubleToLongBits(observedMass) != Double.doubleToLongBits(other.observedMass))
+			return false;
+		if (peptideSequence == null) {
+			if (other.peptideSequence != null)
+				return false;
+		} else if (!peptideSequence.equals(other.peptideSequence))
+			return false;
+		if (Double.doubleToLongBits(ppmError) != Double.doubleToLongBits(other.ppmError))
+			return false;
 		if (reportedPeptide == null) {
 			if (other.reportedPeptide != null)
 				return false;
 		} else if (!reportedPeptide.equals(other.reportedPeptide))
 			return false;
+		if (Double.doubleToLongBits(retentionTime) != Double.doubleToLongBits(other.retentionTime))
+			return false;
 		if (scanNumber != other.scanNumber)
+			return false;
+		if (Double.doubleToLongBits(score) != Double.doubleToLongBits(other.score))
 			return false;
 		return true;
 	}
@@ -163,6 +204,34 @@ public class MagnumPSM {
 		this.charge = charge;
 	}
 
+	/**
+	 * @return the peptideSequence
+	 */
+	public String getPeptideSequence() {
+		return peptideSequence;
+	}
+
+	/**
+	 * @param peptideSequence the peptideSequence to set
+	 */
+	public void setPeptideSequence(String peptideSequence) {
+		this.peptideSequence = peptideSequence;
+	}
+	/**
+	 * @return the modifications
+	 */
+	public Map<Integer, Double> getModifications() {
+		return modifications;
+	}
+	/**
+	 * @param modifications the modifications to set
+	 */
+	public void setModifications(Map<Integer, Double> modifications) {
+		this.modifications = modifications;
+	}
+
+
+
 
 	private double retentionTime;
 	private int scanNumber;
@@ -173,5 +242,7 @@ public class MagnumPSM {
 	private double eValue;
 	private double score;
 	private double dScore;
+	private String peptideSequence;
+	private Map<Integer, Double> modifications;
 	
 }
