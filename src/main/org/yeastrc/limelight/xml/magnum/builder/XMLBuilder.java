@@ -2,6 +2,7 @@ package org.yeastrc.limelight.xml.magnum.builder;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.util.Collection;
@@ -272,7 +273,7 @@ public class XMLBuilder {
 					PeptideModification xmlModification = new PeptideModification();
 					xmlModifications.getPeptideModification().add( xmlModification );
 							
-					xmlModification.setMass( BigDecimal.valueOf( parsedPeptide.getModMap().get( position ) ) );
+					xmlModification.setMass( BigDecimal.valueOf( parsedPeptide.getModMap().get( position ) ).stripTrailingZeros().setScale( 0 ) );
 					xmlModification.setPosition( new BigInteger( String.valueOf( position ) ) );
 				}
 			}
@@ -285,7 +286,7 @@ public class XMLBuilder {
 			// iterate over all PSMs for this reported peptide
 			for( int scanNumber : percolatorResults.getReportedPeptidePSMMap().get( percolatorPeptide ).keySet() ) {
 				
-				Collection<MagnumPSM> magnumPSMs = magnumResults.getMagnumResultMap().get( percolatorPeptide ).get( scanNumber );
+				Collection<MagnumPSM> magnumPSMs = magnumResults.getMagnumResultMap().get( percolatorPeptide.getReportedPeptide() ).get( scanNumber );
 
 				/*
 				 * PSMs listed by percolator cannot be reliably matched to specific PSMs listed by Magnum.
@@ -404,7 +405,7 @@ public class XMLBuilder {
 							for( int position : magnumPSM.getModifications().keySet() ) {
 								PsmModification xmlPSMModification = new PsmModification();
 								xmlPSMModifications.getPsmModification().add( xmlPSMModification );
-										
+																
 								xmlPSMModification.setMass( BigDecimal.valueOf( magnumPSM.getModifications().get( position ) ) );
 								xmlPSMModification.setPosition( new BigInteger( String.valueOf( position ) ) );
 							}

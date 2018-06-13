@@ -4,8 +4,6 @@ import static java.lang.Math.toIntExact;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,9 +40,7 @@ public class MagnumPEPXMLResultsReader {
 	public static MagnumResults getMagnumResults( File pepXMLFile, MagnumParameters params ) throws Throwable {
 
 		Map<String,Map<Integer,Collection<MagnumPSM>>> resultMap = new HashMap<>();
-		
-		System.err.println( params );
-		
+				
 		MsmsPipelineAnalysis msAnalysis = null;
 		try {
 			msAnalysis = getMSmsPipelineAnalysis( pepXMLFile );
@@ -171,7 +167,7 @@ public class MagnumPEPXMLResultsReader {
 			for( ModAminoacidMass mod : mofo.getModAminoacidMass() ) {
 				
 				String aminoAcid = peptideSequence.substring( mod.getPosition().intValue() - 1, mod.getPosition().intValue() );
-				Double modMass = mod.getMass() - MagnumConstants.AA_MASS.get( aminoAcid );
+				Double modMass = BigDecimal.valueOf( mod.getMass() ).subtract( BigDecimal.valueOf( MagnumConstants.AA_MASS.get( aminoAcid ) ) ).doubleValue();
 				
 				modMap.put( mod.getPosition().intValueExact(), modMass );
 			}

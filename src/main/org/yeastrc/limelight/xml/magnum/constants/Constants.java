@@ -24,8 +24,8 @@ public class Constants {
 	public static final String PROGRAM_NAME_PERCOLATOR = "Percolator";
 	
 	public static final String CONVERSION_PROGRAM_NAME = "magnumToLimelightXML.jar";
-	public static final String CONVERSION_PROGRAM_URI = "https://github.com/yeastrc/magnum-percolator-limelight-xml";
-	public static final String CONVERSION_PROGRAM_VERSION = "v0.0.1";
+	public static final String CONVERSION_PROGRAM_URI = "https://github.com/yeastrc/limelight-import-magnum-percolator";
+	public static final String CONVERSION_PROGRAM_VERSION = "v0.0.2";
 	
 	
 	

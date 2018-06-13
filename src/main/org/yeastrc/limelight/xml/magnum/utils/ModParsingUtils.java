@@ -5,9 +5,7 @@ import org.yeastrc.limelight.xml.magnum.objects.MagnumPSM;
 public class ModParsingUtils {
 
 	public static String getRoundedReportedPeptideString( MagnumPSM psm ) {
-		
-		System.out.println( psm.getModifications().size() );
-		
+				
 		if( psm.getModifications() == null && psm.getModifications().size() < 1 )
 			return psm.getPeptideSequence();
 		
@@ -22,15 +20,13 @@ public class ModParsingUtils {
 		    	double mass = psm.getModifications().get( i + 1 );
 		    	
 		    	sb.append( "[" );
-		    	sb.append( (int)mass );		    			    	
+		    	sb.append( Math.round( mass ) );
 		    	sb.append( "]" );
 		    	
 		    }
 		}
-		
-		System.out.println( sb.toString() );
-		
+				
 		return sb.toString();
 	}
-	
+
 }
