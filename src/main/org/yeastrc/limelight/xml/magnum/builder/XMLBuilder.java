@@ -274,8 +274,6 @@ public class XMLBuilder {
 							
 					xmlModification.setMass( BigDecimal.valueOf( parsedPeptide.getModMap().get( position ) ) );
 					xmlModification.setPosition( new BigInteger( String.valueOf( position ) ) );
-
-					xmlModification.setHavePsmLevelData( true ); // assume all mods have psm-level data for magnum/perc data
 				}
 			}
 
