@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 
+import org.yeastrc.limelight.xml.magnum.constants.Constants;
 import org.yeastrc.limelight.xml.magnum.objects.ConversionParameters;
 import org.yeastrc.limelight.xml.magnum.objects.ConversionProgramInfo;
 
@@ -33,6 +34,8 @@ public class MainProgram {
 
 	public static void main( String[] args ) throws Throwable {
 		
+		printRuntimeInfo();
+
 		if( args.length < 1 || args[ 0 ].equals( "-h" ) ) {
 			printHelp();
 			System.exit( 0 );
@@ -117,5 +120,30 @@ public class MainProgram {
 		}
 	}
 	
+	/**
+	 * Print runtime info to STD ERR
+	 * @throws Exception 
+	 */
+	public static void printRuntimeInfo() throws Exception {
+
+		try( BufferedReader br = new BufferedReader( new InputStreamReader( MainProgram.class.getResourceAsStream( "run.txt" ) ) ) ) {
+
+			String line = null;
+			while ( ( line = br.readLine() ) != null ) {
+
+				line = line.replace( "{{URL}}", Constants.CONVERSION_PROGRAM_URI );
+				line = line.replace( "{{VERSION}}", Constants.CONVERSION_PROGRAM_VERSION );
+
+				System.err.println( line );
+				
+			}
+			
+			System.err.println( "" );
+
+		} catch ( Exception e ) {
+			System.out.println( "Error printing runtime information." );
+			throw e;
+		}
+	}
 	
 }
