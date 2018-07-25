@@ -42,11 +42,12 @@ public class MatchedProteinsBuilder {
 	 * @param decoyIdentifiers
 	 * @throws Exception
 	 */
-	public void buildMatchedProteins( LimelightInput limelightInputRoot, File fastaFile, Collection<PercolatorPeptide> percolatorPeptides ) throws Exception {
+	public void buildMatchedProteins( LimelightInput limelightInputRoot, File fastaFile, Collection<PercolatorPeptide> reportedPeptides ) throws Exception {
 		
+		System.err.print( " Matching peptides to proteins..." );
 
 		// the proteins we've found
-		Map<String, Collection<FastaProteinAnnotation>> proteins = getProteins( percolatorPeptides, fastaFile );
+		Map<String, Collection<FastaProteinAnnotation>> proteins = getProteins( reportedPeptides, fastaFile );
 		
 		// create the XML and add to root element
 		buildAndAddMatchedProteinsToXML( limelightInputRoot, proteins );
@@ -100,10 +101,11 @@ public class MatchedProteinsBuilder {
 	 * @return
 	 * @throws Exception
 	 */
-	private Map<String, Collection<FastaProteinAnnotation>> getProteins( Collection<PercolatorPeptide> percolatorPeptides, File fastaFile ) throws Exception {
+	private Map<String, Collection<FastaProteinAnnotation>> getProteins( Collection<PercolatorPeptide> reportedPeptides, File fastaFile ) throws Exception {
 		
 		// get a unique set of naked peptide sequence
-		Collection<String> nakedPeptideSequences = getNakedPeptideSequences( percolatorPeptides );
+		Collection<String> nakedPeptideSequences = getNakedPeptideSequences( reportedPeptides );
+		Collection<String> remainingPeptideSequences = new HashSet<>( nakedPeptideSequences );
 		
 		Map<String, Collection<FastaProteinAnnotation>> proteinAnnotations = new HashMap<>();
 		
@@ -112,9 +114,14 @@ public class MatchedProteinsBuilder {
 		try {
 			
 			fastaReader = FASTAReader.getInstance( fastaFile );
-			
+			int count = 0;
+			System.err.println( "" );
+
 			for( FASTAEntry entry = fastaReader.readNext(); entry != null; entry = fastaReader.readNext() ) {
 
+				count++;
+				System.err.print( "\tTested " + count + " FASTA entries...\r" );
+				
 				for( String nakedSequence : nakedPeptideSequences ) {
 					
 					if( ProteinInferenceUtils.proteinContainsReportedPeptide( entry.getSequence(), nakedSequence ) ) {
@@ -134,13 +141,24 @@ public class MatchedProteinsBuilder {
 
 						}//end iterating over fasta headers
 						
-						break;// no need to check more peptides for this protein, we found one						
-
+						remainingPeptideSequences.remove( nakedSequence );
+						
 					} // end if statement for protein containing peptide
 
 				} // end iterating over peptide sequences
 				
 			}// end iterating over fasta entries
+			
+			
+			if( remainingPeptideSequences.size() > 0 ) {
+				System.err.println( "\nError: Not all peptides in the results could be matched to a protein in the FASTA file." );
+				System.err.println( "\tUnmatched peptides:" );
+				for( String s : remainingPeptideSequences ) {
+					System.err.println( "\t\t" + s );
+				}
+			}
+			
+			System.err.print( "\n" );
 			
 			
 		} finally {
@@ -177,63 +195,52 @@ public class MatchedProteinsBuilder {
 	 *
 	 */
 	private class FastaProteinAnnotation {
-		
-		public int hashCode() {
-			
-			String hashString = this.getName();
-			
-			if( this.getDescription() != null )
-				hashString += this.getDescription();
-			
-			if( this.getTaxonomId() != null )
-				hashString += this.getTaxonomId().intValue();
-			
-			return hashString.hashCode();
-		}
-		
-		/**
-		 * Return true if name, description and taxonomy are all the same, false otherwise
-		 */
-		public boolean equals( Object o ) {
-			try {
-				
-				FastaProteinAnnotation otherAnno = (FastaProteinAnnotation)o;
-				
-				if( !this.getName().equals( otherAnno.getName() ) )
-					return false;
-				
-				
-				if( this.getDescription() == null ) {
-					if( otherAnno.getDescription() != null )
-						return false;
-				} else {
-					if( otherAnno.getDescription() == null )
-						return false;
-				}
-				
-				if( !this.getDescription().equals( otherAnno.getDescription() ) )
-					return false;
-				
-				
-				if( this.getTaxonomId() == null ) {
-					if( otherAnno.getTaxonomId() != null )
-						return false;
-				} else {
-					if( otherAnno.getTaxonomId() == null )
-						return false;
-				}
-				
-				if( !this.getTaxonomId().equals( otherAnno.getTaxonomId() ) )
-					return false;
-				
-				
-				return true;
-				
-			} catch( Exception e ) {
-				return false;
-			}
-		}
 
+		
+		/* (non-Javadoc)
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + getOuterType().hashCode();
+			result = prime * result + ((description == null) ? 0 : description.hashCode());
+			result = prime * result + ((name == null) ? 0 : name.hashCode());
+			result = prime * result + ((taxonomId == null) ? 0 : taxonomId.hashCode());
+			return result;
+		}
+		/* (non-Javadoc)
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (!(obj instanceof FastaProteinAnnotation))
+				return false;
+			FastaProteinAnnotation other = (FastaProteinAnnotation) obj;
+			if (!getOuterType().equals(other.getOuterType()))
+				return false;
+			if (description == null) {
+				if (other.description != null)
+					return false;
+			} else if (!description.equals(other.description))
+				return false;
+			if (name == null) {
+				if (other.name != null)
+					return false;
+			} else if (!name.equals(other.name))
+				return false;
+			if (taxonomId == null) {
+				if (other.taxonomId != null)
+					return false;
+			} else if (!taxonomId.equals(other.taxonomId))
+				return false;
+			return true;
+		}
 		
 		public String getName() {
 			return name;
@@ -259,6 +266,9 @@ public class MatchedProteinsBuilder {
 		private String name;
 		private String description;
 		private Integer taxonomId;
+		private MatchedProteinsBuilder getOuterType() {
+			return MatchedProteinsBuilder.this;
+		}
 		
 	}
 	
