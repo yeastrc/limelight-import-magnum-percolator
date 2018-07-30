@@ -2,7 +2,6 @@ package org.yeastrc.limelight.xml.magnum.builder;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.util.Collection;

@@ -7,17 +7,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import org.yeastrc.fasta.FASTAEntry;
+import org.yeastrc.fasta.FASTAHeader;
+import org.yeastrc.fasta.FASTAReader;
 import org.yeastrc.limelight.limelight_import.api.xml_dto.LimelightInput;
 import org.yeastrc.limelight.limelight_import.api.xml_dto.MatchedProtein;
 import org.yeastrc.limelight.limelight_import.api.xml_dto.MatchedProteinLabel;
 import org.yeastrc.limelight.limelight_import.api.xml_dto.MatchedProteins;
-import org.yeastrc.limelight.xml.magnum.objects.ParsedPeptide;
 import org.yeastrc.limelight.xml.magnum.objects.PercolatorPeptide;
-import org.yeastrc.limelight.xml.magnum.utils.ProteinInferenceUtils;
 import org.yeastrc.limelight.xml.magnum.utils.ReportedPeptideParsingUtils;
-import org.yeastrc.fasta.FASTAEntry;
-import org.yeastrc.fasta.FASTAHeader;
-import org.yeastrc.fasta.FASTAReader;
 
 
 /**
@@ -46,13 +44,41 @@ public class MatchedProteinsBuilder {
 		
 		System.err.print( " Matching peptides to proteins..." );
 
-		// the proteins we've found
-		Map<String, Collection<FastaProteinAnnotation>> proteins = getProteins( reportedPeptides, fastaFile );
+		// process the reported peptides to get naked peptide objects
+		Collection<PeptideObject> nakedPeptideObjects = getNakedPeptideObjectsForPercolatorReportedPeptides( reportedPeptides );
+		
+		// find the proteins matched by any of these peptides
+		Map<String, Collection<FastaProteinAnnotation>> proteins = getProteins( nakedPeptideObjects, fastaFile );
 		
 		// create the XML and add to root element
 		buildAndAddMatchedProteinsToXML( limelightInputRoot, proteins );
 		
 	}
+	
+	
+	private Collection<PeptideObject> getNakedPeptideObjectsForPercolatorReportedPeptides( Collection< PercolatorPeptide > percolatorPeptides ) {
+		
+		Collection<PeptideObject> nakedPeptideObjects = new HashSet<>();
+		
+		for( PercolatorPeptide reportedPeptide : percolatorPeptides ) {
+			
+			PeptideObject nakedPeptideObject = new PeptideObject();
+			nakedPeptideObject.setFoundMatchingProtein( false );
+			nakedPeptideObject.setPeptideSequence( ReportedPeptideParsingUtils.parsePeptide( reportedPeptide.getReportedPeptide() ).getNakedSequence() );
+			
+			nakedPeptideObjects.add( nakedPeptideObject );
+		}
+		
+		
+		return nakedPeptideObjects;
+	}
+	
+	
+	
+	
+	/* ***************** REST OF THIS CAN BE MOVED TO CENTRALIZED LIB **************************** */
+	
+	
 	
 	/**
 	 * Do the work of building the matched peptides element and adding to limelight xml root
@@ -101,11 +127,7 @@ public class MatchedProteinsBuilder {
 	 * @return
 	 * @throws Exception
 	 */
-	private Map<String, Collection<FastaProteinAnnotation>> getProteins( Collection<PercolatorPeptide> reportedPeptides, File fastaFile ) throws Exception {
-		
-		// get a unique set of naked peptide sequence
-		Collection<String> nakedPeptideSequences = getNakedPeptideSequences( reportedPeptides );
-		Collection<String> remainingPeptideSequences = new HashSet<>( nakedPeptideSequences );
+	private Map<String, Collection<FastaProteinAnnotation>> getProteins( Collection<PeptideObject> nakedPeptideObjects, File fastaFile ) throws Exception {
 		
 		Map<String, Collection<FastaProteinAnnotation>> proteinAnnotations = new HashMap<>();
 		
@@ -120,28 +142,51 @@ public class MatchedProteinsBuilder {
 			for( FASTAEntry entry = fastaReader.readNext(); entry != null; entry = fastaReader.readNext() ) {
 
 				count++;
+				boolean foundPeptideForFASTAEntry = false;
+				
+				// use this sequence to determine if it contains a peptide sequence
+				String fastaSequence = entry.getSequence().replaceAll( "L", "I" );
+				
 				System.err.print( "\tTested " + count + " FASTA entries...\r" );
 				
-				for( String nakedSequence : nakedPeptideSequences ) {
+				for( PeptideObject nakedPeptideObject : nakedPeptideObjects ) {
 					
-					if( ProteinInferenceUtils.proteinContainsReportedPeptide( entry.getSequence(), nakedSequence ) ) {
+					// optimization: if we already know we're including this protein and
+					// we have already mapped this peptide to any protein, we can skip
+					// this peptide...
+					if( foundPeptideForFASTAEntry && nakedPeptideObject.foundMatchingProtein ) {
+						continue;
+					}
+					
+					if( nakedPeptideObject.getSearchSequence() == null ) {
+						nakedPeptideObject.setSearchSequence( nakedPeptideObject.getPeptideSequence().replaceAll( "L", "I" ) );
+					}
+					
+					String peptideSearchSequence = nakedPeptideObject.getSearchSequence();
+					
+					
+					if( fastaSequence.contains( peptideSearchSequence ) ) {
 						
 						// this protein has a matching peptide
 						
-						for( FASTAHeader header : entry.getHeaders() ) {
+						if( !foundPeptideForFASTAEntry ) {
+							for( FASTAHeader header : entry.getHeaders() ) {
+								
+								if( !proteinAnnotations.containsKey( entry.getSequence() ) )
+									proteinAnnotations.put( entry.getSequence(), new HashSet<FastaProteinAnnotation>() );
+								
+								FastaProteinAnnotation anno = new FastaProteinAnnotation();
+								anno.setName( header.getName() );
+								anno.setDescription( header.getDescription() );
+			            		
+								proteinAnnotations.get( entry.getSequence() ).add( anno );
+	
+							}//end iterating over fasta headers
 							
-							if( !proteinAnnotations.containsKey( entry.getSequence() ) )
-								proteinAnnotations.put( entry.getSequence(), new HashSet<FastaProteinAnnotation>() );
-							
-							FastaProteinAnnotation anno = new FastaProteinAnnotation();
-							anno.setName( header.getName() );
-							anno.setDescription( header.getDescription() );
-		            		
-							proteinAnnotations.get( entry.getSequence() ).add( anno );
-
-						}//end iterating over fasta headers
+							foundPeptideForFASTAEntry = true;
+						}
 						
-						remainingPeptideSequences.remove( nakedSequence );
+						nakedPeptideObject.setFoundMatchingProtein( true );
 						
 					} // end if statement for protein containing peptide
 
@@ -149,13 +194,16 @@ public class MatchedProteinsBuilder {
 				
 			}// end iterating over fasta entries
 			
-			
-			if( remainingPeptideSequences.size() > 0 ) {
+			if( nakedPeptideObjectsContainsUnmatchedPeptides( nakedPeptideObjects ) ) {
 				System.err.println( "\nError: Not all peptides in the results could be matched to a protein in the FASTA file." );
 				System.err.println( "\tUnmatched peptides:" );
-				for( String s : remainingPeptideSequences ) {
-					System.err.println( "\t\t" + s );
+				for( PeptideObject nakedPeptideObject : nakedPeptideObjects ) {
+					if( !nakedPeptideObject.isFoundMatchingProtein() ) {
+						System.err.println( nakedPeptideObject.getPeptideSequence() );
+					}
 				}
+				
+				throw new Exception( "Could not match all peptides to a protein in the FASTA file." );
 			}
 			
 			System.err.print( "\n" );
@@ -170,22 +218,106 @@ public class MatchedProteinsBuilder {
 		
 		return proteinAnnotations;
 	}
-	
-	
 
-	private Collection<String> getNakedPeptideSequences( Collection< PercolatorPeptide > percolatorPeptides ) {
+	
+	private boolean nakedPeptideObjectsContainsUnmatchedPeptides( Collection<PeptideObject> nakedPeptideObjects ) {
 		
-		Collection<String> nakedSequences = new HashSet<>();
-		
-		for( PercolatorPeptide percolatorPeptide : percolatorPeptides ) {
-			ParsedPeptide parsedPeptide = ReportedPeptideParsingUtils.parsePeptide( percolatorPeptide.getReportedPeptide() );
-			nakedSequences.add( parsedPeptide.getNakedSequence() );
+		for( PeptideObject nakedPeptideObject : nakedPeptideObjects ) {
+			if( !nakedPeptideObject.isFoundMatchingProtein() ) {
+				return true;
+			}
 		}
 		
-		
-		return nakedSequences;
+		return false;
 	}
+	
+	private class PeptideObject {
+		
+		private String peptideSequence;
+		private String searchSequence;
+		private boolean foundMatchingProtein;
+		
+		/* (non-Javadoc)
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + getOuterType().hashCode();
+			result = prime * result + ((peptideSequence == null) ? 0 : peptideSequence.hashCode());
+			return result;
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (!(obj instanceof PeptideObject))
+				return false;
+			PeptideObject other = (PeptideObject) obj;
+			if (!getOuterType().equals(other.getOuterType()))
+				return false;
+			if (peptideSequence == null) {
+				if (other.peptideSequence != null)
+					return false;
+			} else if (!peptideSequence.equals(other.peptideSequence))
+				return false;
+			return true;
+		}
+		
+		private MatchedProteinsBuilder getOuterType() {
+			return MatchedProteinsBuilder.this;
+		}
 
+		/**
+		 * @return the peptideSequence
+		 */
+		public String getPeptideSequence() {
+			return peptideSequence;
+		}
+
+		/**
+		 * @param peptideSequence the peptideSequence to set
+		 */
+		public void setPeptideSequence(String peptideSequence) {
+			this.peptideSequence = peptideSequence;
+		}
+
+		/**
+		 * @return the foundMatchingProtein
+		 */
+		public boolean isFoundMatchingProtein() {
+			return foundMatchingProtein;
+		}
+
+		/**
+		 * @param foundMatchingProtein the foundMatchingProtein to set
+		 */
+		public void setFoundMatchingProtein(boolean foundMatchingProtein) {
+			this.foundMatchingProtein = foundMatchingProtein;
+		}
+
+		/**
+		 * @return the searchSequence
+		 */
+		public String getSearchSequence() {
+			return searchSequence;
+		}
+
+		/**
+		 * @param searchSequence the searchSequence to set
+		 */
+		public void setSearchSequence(String searchSequence) {
+			this.searchSequence = searchSequence;
+		}		
+		
+	}
 	
 	
 	/**
@@ -271,5 +403,6 @@ public class MatchedProteinsBuilder {
 		}
 		
 	}
+
 	
 }
