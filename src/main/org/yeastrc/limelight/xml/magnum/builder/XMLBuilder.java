@@ -406,7 +406,7 @@ public class XMLBuilder {
 								PsmModification xmlPSMModification = new PsmModification();
 								xmlPSMModifications.getPsmModification().add( xmlPSMModification );
 																
-								xmlPSMModification.setMass( BigDecimal.valueOf( magnumPSM.getModifications().get( position ) ) );
+								xmlPSMModification.setMass( magnumPSM.getModifications().get( position ) );
 								xmlPSMModification.setPosition( new BigInteger( String.valueOf( position ) ) );
 							}
 						}

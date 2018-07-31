@@ -157,17 +157,17 @@ public class MagnumPEPXMLResultsReader {
 		return psm;
 	}
 	
-	private static Map<Integer, Double> getModificationsForSearchHit( SearchHit searchHit ) throws Throwable {
+	private static Map<Integer, BigDecimal> getModificationsForSearchHit( SearchHit searchHit ) throws Throwable {
 		
 		String peptideSequence = searchHit.getPeptide();
-		Map<Integer, Double> modMap = new HashMap<>();
+		Map<Integer, BigDecimal> modMap = new HashMap<>();
 		
 		ModInfoDataType mofo = searchHit.getModificationInfo();
 		if( mofo != null ) {
 			for( ModAminoacidMass mod : mofo.getModAminoacidMass() ) {
 				
 				String aminoAcid = peptideSequence.substring( mod.getPosition().intValue() - 1, mod.getPosition().intValue() );
-				Double modMass = BigDecimal.valueOf( mod.getMass() ).subtract( BigDecimal.valueOf( MagnumConstants.AA_MASS.get( aminoAcid ) ) ).doubleValue();
+				BigDecimal modMass = BigDecimal.valueOf( mod.getMass() ).subtract( MagnumConstants.AA_MASS.get( aminoAcid ) );
 				
 				modMap.put( mod.getPosition().intValueExact(), modMass );
 			}

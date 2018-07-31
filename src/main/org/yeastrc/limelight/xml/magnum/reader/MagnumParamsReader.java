@@ -47,53 +47,11 @@ public class MagnumParamsReader {
 		MagnumParameters magParams = new MagnumParameters();
 		
 		try ( InputStream is = new FileInputStream( paramsFile ) ) {
-			magParams.setDynamicMods( getDynamicModsFromParamsFile( is ) );
-		}
-		
-		try ( InputStream is = new FileInputStream( paramsFile ) ) {
 			magParams.setStaticMods( getStaticModsFromParamsFile( is ) );
 		}
 		
 		
 		return magParams;
-	}
-	
-	
-	/**
-	 * 
-	 * Example line: modification = C   57.02146 #foo comments
-	 * 
-	 * @param paramsInputStream
-	 * @return
-	 * @throws IOException
-	 */
-	public static Map<Character, Double> getDynamicModsFromParamsFile( InputStream paramsInputStream ) throws IOException {
-		
-		Map<Character, Double> staticMods = new HashMap<>();
-		
-		Pattern p = Pattern.compile( "^modification\\s+=\\s+([A-Z])\\s+([0-9]+(\\.[0-9]+)?).*$" );
-		
-	    try (BufferedReader br = new BufferedReader( new InputStreamReader( paramsInputStream ) ) ) {
-	    	
-			for ( String line = br.readLine(); line != null; line = br.readLine() ) {		
-
-				// skip immediately if it's not a line we want
-				if( !line.startsWith( "modification" ) )
-						continue;
-				
-				Matcher m = p.matcher( line );
-				if( m.matches() ) {
-					char residue = m.group( 1 ).charAt( 0 );					
-					double d = Double.valueOf( m.group( 2 ) );
-					
-					if( d >= 0.000001 )
-						staticMods.put( residue, d );
-				}
-			}
-	    	
-	    }
-		
-		return staticMods;
 	}
 	
 	
