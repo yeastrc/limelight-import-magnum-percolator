@@ -77,7 +77,8 @@ public class MagnumParamsReader {
 						continue;
 				
 				String[] fields = line.split( "\\s+" );
-				if( !fields[ 0 ].equals( "decoy_filter" ) || fields[ 1 ].equals( "=" ) ) {
+				
+				if( !fields[ 0 ].equals( "decoy_filter" ) || !fields[ 1 ].equals( "=" ) ) {
 					throw new Exception( "Error processing decoy_filter from params file. Got this line: " + line );
 				}
 				
