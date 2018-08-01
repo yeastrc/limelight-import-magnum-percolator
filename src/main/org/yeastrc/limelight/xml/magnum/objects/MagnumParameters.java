@@ -37,32 +37,17 @@ public class MagnumParameters {
 			str += "]";
 		}
 		
-		if( this.dynamicMods != null ) {
-			str += " Dynamic mods: [";
-			for( char r : this.dynamicMods.keySet() ) {
-				str += "(";
-				str += r + "," + this.dynamicMods.get( r );
-				str += ")";
-			}
-			str += "]";
+		if( this.decoyPrefix != null ) {
+			str += " decoyPrefix:";
+			str += this.getDecoyPrefix();
+		} else {
+			str += " decoyPrefix:null";
 		}
 
 		return str;
 		
 	}
-	
-	/**
-	 * @return the dynamicMods
-	 */
-	public Map<Character, Double> getDynamicMods() {
-		return dynamicMods;
-	}
-	/**
-	 * @param dynamicMods the dynamicMods to set
-	 */
-	public void setDynamicMods(Map<Character, Double> dynamicMods) {
-		this.dynamicMods = dynamicMods;
-	}
+
 	/**
 	 * @return the staticMods
 	 */
@@ -76,6 +61,16 @@ public class MagnumParameters {
 		this.staticMods = staticMods;
 	}
 	
-	private Map<Character, Double> dynamicMods;
+	
+	public String getDecoyPrefix() {
+		return decoyPrefix;
+	}
+
+	public void setDecoyPrefix(String decoyPrefix) {
+		this.decoyPrefix = decoyPrefix;
+	}
+
+
 	private Map<Character, Double> staticMods;
+	private String decoyPrefix;
 }

@@ -21,7 +21,6 @@ package org.yeastrc.limelight.xml.magnum.reader;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -39,10 +38,9 @@ public class MagnumParamsReader {
 	 * 
 	 * @param paramsFile
 	 * @return
-	 * @throws FileNotFoundException
-	 * @throws IOException
+	 * @throws Exception 
 	 */
-	public static MagnumParameters getMagnumParameters( File paramsFile ) throws FileNotFoundException, IOException {
+	public static MagnumParameters getMagnumParameters( File paramsFile ) throws Exception {
 		
 		MagnumParameters magParams = new MagnumParameters();
 		
@@ -50,8 +48,47 @@ public class MagnumParamsReader {
 			magParams.setStaticMods( getStaticModsFromParamsFile( is ) );
 		}
 		
+		try ( InputStream is = new FileInputStream( paramsFile ) ) {
+			magParams.setDecoyPrefix( getDecoyPrefixFromParamsFile( is ) );
+		}
+		
 		
 		return magParams;
+	}
+	
+	/**
+	 * Get the decoy string defined in the params file
+	 * 
+	 * From params file:
+	 * decoy_filter = random     #identifier for all decoys in the database.
+	 * 
+	 * @param paramsInputStream
+	 * @return
+	 * @throws Exception 
+	 */
+	public static String getDecoyPrefixFromParamsFile( InputStream paramsInputStream ) throws Exception {
+		
+	    try (BufferedReader br = new BufferedReader( new InputStreamReader( paramsInputStream ) ) ) {
+	    	
+			for ( String line = br.readLine(); line != null; line = br.readLine() ) {		
+
+				// skip immediately if it's not a line we want
+				if( !line.startsWith( "decoy_filter" ) )
+						continue;
+				
+				String[] fields = line.split( "\\s+" );
+				if( !fields[ 0 ].equals( "decoy_filter" ) || fields[ 1 ].equals( "=" ) ) {
+					throw new Exception( "Error processing decoy_filter from params file. Got this line: " + line );
+				}
+				
+				return fields[ 2 ];
+
+			}
+	    	
+	    }
+	    
+	    return null;	// could not find a decoy_filter--just assume we don't have one instead of throwing an exception
+		
 	}
 	
 	

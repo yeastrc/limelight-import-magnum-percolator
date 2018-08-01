@@ -423,7 +423,8 @@ public class XMLBuilder {
 		MatchedProteinsBuilder.getInstance().buildMatchedProteins(
 				                                                   limelightInputRoot,
 				                                                   conversionParameters.getFastaFile(),
-				                                                   percolatorResults.getReportedPeptidePSMMap().keySet()
+				                                                   percolatorResults.getReportedPeptidePSMMap().keySet(),
+				                                                   magnumParameters.getDecoyPrefix()
 				                                                  );
 		
 		
