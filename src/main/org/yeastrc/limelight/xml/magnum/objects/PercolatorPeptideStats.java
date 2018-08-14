@@ -18,7 +18,7 @@
 
 package org.yeastrc.limelight.xml.magnum.objects;
 
-public class PercolatorPeptide {
+public class PercolatorPeptideStats {
 	
 	
 	
@@ -53,7 +53,7 @@ public class PercolatorPeptide {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		PercolatorPeptide other = (PercolatorPeptide) obj;
+		PercolatorPeptideStats other = (PercolatorPeptideStats) obj;
 		if (reportedPeptide == null) {
 			if (other.reportedPeptide != null)
 				return false;

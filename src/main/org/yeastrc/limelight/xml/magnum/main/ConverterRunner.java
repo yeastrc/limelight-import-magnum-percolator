@@ -27,6 +27,7 @@ import org.yeastrc.limelight.xml.magnum.reader.MagnumParamsReader;
 import org.yeastrc.limelight.xml.magnum.reader.MagnumPEPXMLResultsReader;
 import org.yeastrc.limelight.xml.magnum.reader.PercolatorResultsReader;
 import org.yeastrc.limelight.xml.magnum.utils.DataComparer;
+import org.yeastrc.limelight.xml.magnum.utils.MagnumParsingUtils;
 
 public class ConverterRunner {
 
@@ -52,6 +53,7 @@ public class ConverterRunner {
 		
 		
 		System.err.print( "Ensuring Percolator and magnum data match up..." );
+		MagnumParsingUtils.mapMagnumPSMsToPercolatorReportedPeptides( magnumResults, percolatorResults );
 		DataComparer.compareData( magnumResults, percolatorResults );
 		System.err.println( " Done." );
 		

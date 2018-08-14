@@ -14,7 +14,6 @@ import org.yeastrc.limelight.limelight_import.api.xml_dto.LimelightInput;
 import org.yeastrc.limelight.limelight_import.api.xml_dto.MatchedProtein;
 import org.yeastrc.limelight.limelight_import.api.xml_dto.MatchedProteinLabel;
 import org.yeastrc.limelight.limelight_import.api.xml_dto.MatchedProteins;
-import org.yeastrc.limelight.xml.magnum.objects.PercolatorPeptide;
 import org.yeastrc.limelight.xml.magnum.utils.ReportedPeptideParsingUtils;
 
 
@@ -40,7 +39,7 @@ public class MatchedProteinsBuilder {
 	 * @param decoyIdentifiers
 	 * @throws Exception
 	 */
-	public void buildMatchedProteins( LimelightInput limelightInputRoot, File fastaFile, Collection<PercolatorPeptide> reportedPeptides, String decoyPrefix ) throws Exception {
+	public void buildMatchedProteins( LimelightInput limelightInputRoot, File fastaFile, Collection<String> reportedPeptides, String decoyPrefix ) throws Exception {
 		
 		System.err.print( " Matching peptides to proteins..." );
 
@@ -56,15 +55,15 @@ public class MatchedProteinsBuilder {
 	}
 	
 	
-	private Collection<PeptideObject> getNakedPeptideObjectsForPercolatorReportedPeptides( Collection< PercolatorPeptide > percolatorPeptides ) {
+	private Collection<PeptideObject> getNakedPeptideObjectsForPercolatorReportedPeptides( Collection< String > percolatorPeptides ) {
 		
 		Collection<PeptideObject> nakedPeptideObjects = new HashSet<>();
 		
-		for( PercolatorPeptide reportedPeptide : percolatorPeptides ) {
+		for( String reportedPeptide : percolatorPeptides ) {
 			
 			PeptideObject nakedPeptideObject = new PeptideObject();
 			nakedPeptideObject.setFoundMatchingProtein( false );
-			nakedPeptideObject.setPeptideSequence( ReportedPeptideParsingUtils.parsePeptide( reportedPeptide.getReportedPeptide() ).getNakedSequence() );
+			nakedPeptideObject.setPeptideSequence( ReportedPeptideParsingUtils.parsePeptide( reportedPeptide ).getNakedSequence() );
 			
 			nakedPeptideObjects.add( nakedPeptideObject );
 		}

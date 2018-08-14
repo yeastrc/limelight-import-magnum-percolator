@@ -19,7 +19,6 @@
 package org.yeastrc.limelight.xml.magnum.utils;
 
 import org.yeastrc.limelight.xml.magnum.objects.MagnumResults;
-import org.yeastrc.limelight.xml.magnum.objects.PercolatorPeptide;
 import org.yeastrc.limelight.xml.magnum.objects.PercolatorResults;
 
 public class DataComparer {
@@ -35,21 +34,18 @@ public class DataComparer {
 	 */
 	public static void compareData( MagnumResults magnumResults, PercolatorResults percolatorResults ) throws Exception {
 		
-		for( PercolatorPeptide percolatorPeptide : percolatorResults.getReportedPeptidePSMMap().keySet() ) {
-			
-			String reportedPeptideString = percolatorPeptide.getReportedPeptide();
-
+		for( String reportedPeptideString : percolatorResults.getPeptideResults().keySet() ) {
 			
 			if( !magnumResults.getMagnumResultMap().containsKey( reportedPeptideString ) ) {
 				
-				throw new Exception( "Could not find reported peptide (" + reportedPeptideString + " in magnum results." );
+				throw new Exception( "Could not find reported peptide (" + reportedPeptideString + ") in magnum results." );
 			}
 			
 			/*
 			 * check that all scan numbers reported for this reported peptide by percolator were
 			 * also reported for this reported peptide by magnum
 			 */
-			for( int scanNumber : percolatorResults.getReportedPeptidePSMMap().get( percolatorPeptide ).keySet() ) {
+			for( int scanNumber : percolatorResults.getPeptideResults().get( reportedPeptideString ).getPsmsIndexedByScanNumber().keySet() ) {
 				
 				if( !magnumResults.getMagnumResultMap().get( reportedPeptideString ).containsKey( scanNumber ) )
 					throw new Exception( "Could not find reported peptide (" + reportedPeptideString + ") for scan number (" + scanNumber + ") in magnum results." );

@@ -18,7 +18,6 @@
 
 package org.yeastrc.limelight.xml.magnum.objects;
 
-import java.util.Collection;
 import java.util.Map;
 
 public class PercolatorResults {
@@ -35,26 +34,23 @@ public class PercolatorResults {
 	public void setPercolatorVersion(String percolatorVersion) {
 		this.percolatorVersion = percolatorVersion;
 	}
-
-	
 	/**
 	 * @return the reportedPeptidePSMMap
 	 */
-	public Map<PercolatorPeptide, Map<Integer, Collection<PercolatorPSM>>> getReportedPeptidePSMMap() {
-		return reportedPeptidePSMMap;
+	public Map<String, PercolatorPeptideResult> getPeptideResults() {
+		return peptideResults;
 	}
 	/**
 	 * @param reportedPeptidePSMMap the reportedPeptidePSMMap to set
 	 */
-	public void setReportedPeptidePSMMap(
-			Map<PercolatorPeptide, Map<Integer, Collection<PercolatorPSM>>> reportedPeptidePSMMap) {
-		this.reportedPeptidePSMMap = reportedPeptidePSMMap;
+	public void setPeptideResults(Map<String, PercolatorPeptideResult> reportedPeptidePSMMap) {
+		this.peptideResults = reportedPeptidePSMMap;
 	}
 
 
 	private String percolatorVersion;
 	
-	// map of reported peptide to scan numbers to psm (a reported peptde + scan number is unique)
-	private Map<PercolatorPeptide, Map<Integer, Collection<PercolatorPSM>>> reportedPeptidePSMMap;	
+	// map of reported peptide strings to a peptide result object containing stats and psms
+	private Map<String, PercolatorPeptideResult> peptideResults;	
 	
 }

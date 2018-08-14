@@ -77,7 +77,7 @@ public class MagnumPEPXMLResultsReader {
 							
 						}
 						
-						String psmReportedPeptide = ModParsingUtils.getRoundedReportedPeptideString( psm );
+						String psmReportedPeptide = ModParsingUtils.getRoundedReportedPeptideString( psm.getPeptideSequence(), psm.getModifications() );
 						
 						if( !results.getMagnumResultMap().containsKey( psmReportedPeptide ) )
 							results.getMagnumResultMap().put( psmReportedPeptide, new HashMap<>() );

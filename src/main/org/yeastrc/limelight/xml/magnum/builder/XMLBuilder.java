@@ -54,7 +54,8 @@ import org.yeastrc.limelight.xml.magnum.objects.MagnumParameters;
 import org.yeastrc.limelight.xml.magnum.objects.MagnumResults;
 import org.yeastrc.limelight.xml.magnum.objects.ParsedPeptide;
 import org.yeastrc.limelight.xml.magnum.objects.PercolatorPSM;
-import org.yeastrc.limelight.xml.magnum.objects.PercolatorPeptide;
+import org.yeastrc.limelight.xml.magnum.objects.PercolatorPeptideResult;
+import org.yeastrc.limelight.xml.magnum.objects.PercolatorPeptideStats;
 import org.yeastrc.limelight.xml.magnum.objects.PercolatorResults;
 import org.yeastrc.limelight.xml.magnum.utils.ModParsingUtils;
 import org.yeastrc.limelight.xml.magnum.utils.ReportedPeptideParsingUtils;
@@ -206,14 +207,18 @@ public class XMLBuilder {
 		limelightInputRoot.setReportedPeptides( reportedPeptides );
 		
 		// iterate over each distinct reported peptide
-		for( PercolatorPeptide percolatorPeptide : percolatorResults.getReportedPeptidePSMMap().keySet() ) {
+		for( String percolatorReportedPeptide : percolatorResults.getPeptideResults().keySet() ) {
 			
-			ParsedPeptide parsedPeptide = ReportedPeptideParsingUtils.parsePeptide( percolatorPeptide.getReportedPeptide() );
+			PercolatorPeptideResult peptideResult = percolatorResults.getPeptideResults().get( percolatorReportedPeptide );
+			
+			PercolatorPeptideStats peptideStats = peptideResult.getPercolatorPeptideStats();
+			
+			ParsedPeptide parsedPeptide = ReportedPeptideParsingUtils.parsePeptide( percolatorReportedPeptide );
 			
 			ReportedPeptide xmlReportedPeptide = new ReportedPeptide();
 			reportedPeptides.getReportedPeptide().add( xmlReportedPeptide );
 			
-			xmlReportedPeptide.setReportedPeptideString( percolatorPeptide.getReportedPeptide() );
+			xmlReportedPeptide.setReportedPeptideString( percolatorReportedPeptide );
 			xmlReportedPeptide.setSequence( parsedPeptide.getNakedSequence() );
 
 			
@@ -231,7 +236,7 @@ public class XMLBuilder {
 				
 				xmlFilterableReportedPeptideAnnotation.setAnnotationName( PeptideAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_QVALUE );
 				xmlFilterableReportedPeptideAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
-				xmlFilterableReportedPeptideAnnotation.setValue( BigDecimal.valueOf( percolatorPeptide.getqValue()) );
+				xmlFilterableReportedPeptideAnnotation.setValue( BigDecimal.valueOf( peptideStats.getqValue()) );
 			}
 			// handle p-value
 			{
@@ -240,7 +245,7 @@ public class XMLBuilder {
 				
 				xmlFilterableReportedPeptideAnnotation.setAnnotationName( PeptideAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_PVALUE );
 				xmlFilterableReportedPeptideAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
-				xmlFilterableReportedPeptideAnnotation.setValue( BigDecimal.valueOf( percolatorPeptide.getpValue()) );
+				xmlFilterableReportedPeptideAnnotation.setValue( BigDecimal.valueOf( peptideStats.getpValue()) );
 			}
 			// handle pep
 			{
@@ -249,7 +254,7 @@ public class XMLBuilder {
 				
 				xmlFilterableReportedPeptideAnnotation.setAnnotationName( PeptideAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_PEP );
 				xmlFilterableReportedPeptideAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
-				xmlFilterableReportedPeptideAnnotation.setValue( BigDecimal.valueOf( percolatorPeptide.getPep()) );
+				xmlFilterableReportedPeptideAnnotation.setValue( BigDecimal.valueOf( peptideStats.getPep()) );
 			}
 			// handle svm score
 			{
@@ -258,7 +263,7 @@ public class XMLBuilder {
 				
 				xmlFilterableReportedPeptideAnnotation.setAnnotationName( PeptideAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_SVMSCORE );
 				xmlFilterableReportedPeptideAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
-				xmlFilterableReportedPeptideAnnotation.setValue( BigDecimal.valueOf( percolatorPeptide.getSvmScore()) );
+				xmlFilterableReportedPeptideAnnotation.setValue( BigDecimal.valueOf( peptideStats.getSvmScore()) );
 			}
 			
 
@@ -283,9 +288,9 @@ public class XMLBuilder {
 			xmlReportedPeptide.setPsms( xmlPsms );
 			
 			// iterate over all PSMs for this reported peptide
-			for( int scanNumber : percolatorResults.getReportedPeptidePSMMap().get( percolatorPeptide ).keySet() ) {
+			for( int scanNumber : peptideResult.getPsmsIndexedByScanNumber().keySet() ) {
 				
-				Collection<MagnumPSM> magnumPSMs = magnumResults.getMagnumResultMap().get( percolatorPeptide.getReportedPeptide() ).get( scanNumber );
+				Collection<MagnumPSM> magnumPSMs = magnumResults.getMagnumResultMap().get( percolatorReportedPeptide ).get( scanNumber );
 
 				/*
 				 * PSMs listed by percolator cannot be reliably matched to specific PSMs listed by Magnum.
@@ -310,7 +315,7 @@ public class XMLBuilder {
 				 */
 				
 				
-				for( PercolatorPSM percolatorPSM : percolatorResults.getReportedPeptidePSMMap().get( percolatorPeptide ).get( scanNumber ) ) {
+				for( PercolatorPSM percolatorPSM : peptideResult.getPsmsIndexedByScanNumber().get( scanNumber ) ) {
 					
 					for( MagnumPSM magnumPSM : magnumPSMs ) {
 					
@@ -423,7 +428,7 @@ public class XMLBuilder {
 		MatchedProteinsBuilder.getInstance().buildMatchedProteins(
 				                                                   limelightInputRoot,
 				                                                   conversionParameters.getFastaFile(),
-				                                                   percolatorResults.getReportedPeptidePSMMap().keySet(),
+				                                                   percolatorResults.getPeptideResults().keySet(),
 				                                                   magnumParameters.getDecoyPrefix()
 				                                                  );
 		
