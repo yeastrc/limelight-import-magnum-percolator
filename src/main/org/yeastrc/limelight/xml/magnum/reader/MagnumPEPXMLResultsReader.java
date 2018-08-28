@@ -98,7 +98,7 @@ public class MagnumPEPXMLResultsReader {
 		
 		for( MsmsRunSummary runSummary : msAnalysis.getMsmsRunSummary() ) {
 			for( SearchSummary searchSummary : runSummary.getSearchSummary() ) {
-
+				
 				if( searchSummary.getSearchEngine().value().equals( "Magnum" ) ) {
 					return searchSummary.getSearchEngineVersion();
 				}
@@ -157,18 +157,32 @@ public class MagnumPEPXMLResultsReader {
 		return psm;
 	}
 	
+	/**
+	 * Get the mods reported for a searchHit
+	 * 
+	 * Example syntax in pep XML:
+	 * 
+	 *       <mod_aminoacid_mass position="1" mass="147.035379" variable="15.994900" source="param"/>
+	 *       <mod_aminoacid_mass position="3" mass="160.030640" static="57.021460" source="param"/>
+	 *       <mod_aminoacid_mass position="7" mass="162.594409" variable="75.562385" source="adduct"/>
+	 * @param searchHit
+	 * @return
+	 * @throws Throwable
+	 */
 	private static Map<Integer, BigDecimal> getModificationsForSearchHit( SearchHit searchHit ) throws Throwable {
 		
-		String peptideSequence = searchHit.getPeptide();
 		Map<Integer, BigDecimal> modMap = new HashMap<>();
 		
 		ModInfoDataType mofo = searchHit.getModificationInfo();
 		if( mofo != null ) {
 			for( ModAminoacidMass mod : mofo.getModAminoacidMass() ) {
 				
-				String aminoAcid = peptideSequence.substring( mod.getPosition().intValue() - 1, mod.getPosition().intValue() );
-				BigDecimal modMass = BigDecimal.valueOf( mod.getMass() ).subtract( MagnumConstants.AA_MASS.get( aminoAcid ) );
-				
+				// skip static mods
+				if( mod.getStatic() != null ) {
+					continue;
+				}
+				BigDecimal modMass = BigDecimal.valueOf( mod.getVariable() );
+								
 				modMap.put( mod.getPosition().intValueExact(), modMass );
 			}
 		}
