@@ -19,6 +19,7 @@
 package org.yeastrc.limelight.xml.magnum.objects;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.Map;
 
 public class MagnumPSM {
@@ -246,7 +247,13 @@ public class MagnumPSM {
 		this.modifications = modifications;
 	}
 
+	public Collection<BigDecimal> getReporterIons() {
+		return reporterIons;
+	}
 
+	public void setReporterIons(Collection<BigDecimal> reporterIons) {
+		this.reporterIons = reporterIons;
+	}
 
 	private double retentionTime;
 	private int scanNumber;
@@ -259,5 +266,5 @@ public class MagnumPSM {
 	private double dScore;
 	private String peptideSequence;
 	private Map<Integer, BigDecimal> modifications;
-	
+	private Collection<BigDecimal> reporterIons;
 }

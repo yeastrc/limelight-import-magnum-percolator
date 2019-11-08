@@ -32,8 +32,8 @@ public class MagnumPEPXMLResultsReader {
 
 	/**
 	 * Get the parsed magnum results for the given magnum txt data file
-	 * 
-	 * @param magnumFile
+	 * @param pepXMLFile
+	 * @param params
 	 * @return
 	 * @throws Throwable
 	 */
@@ -145,6 +145,8 @@ public class MagnumPEPXMLResultsReader {
 		psm.setdScore( getScoreForType( searchHit, MagnumConstants.PSM_SCORE_DELTA_SCORE ) );
 		psm.setPpmError( getScoreForType( searchHit, MagnumConstants.PSM_SCORE_PPM_ERROR ) );
 		psm.seteValue( getScoreForType( searchHit, MagnumConstants.PSM_SCORE_E_VALUE ) );
+
+		psm.setReporterIons( getReporterIonsForSearchHit( searchHit ) );
 		
 		try {
 			psm.setModifications( getModificationsForSearchHit( searchHit ) );
@@ -189,7 +191,27 @@ public class MagnumPEPXMLResultsReader {
 		
 		return modMap;
 	}
-	
+
+	private static Collection<BigDecimal> getReporterIonsForSearchHit( SearchHit searchHit ) throws Throwable {
+
+		Collection<BigDecimal> reporterIons = new HashSet<>();
+
+		for( NameValueType searchScore : searchHit.getSearchScore() ) {
+			if( searchScore.getName().equals( MagnumConstants.PSM_SCORE_REPORTER_IONS ) ) {
+
+				String reportedReporterIons = searchScore.getValueAttribute();
+				if( reportedReporterIons.length() > 0 && !reportedReporterIons.equals( "-" )) {
+					String[] values = reportedReporterIons.split(",");
+					for( String ri : values ) {
+						reporterIons.add( new BigDecimal( ri ) );
+					}
+				}
+			}
+		}
+
+		return reporterIons;
+	}
+
 	private static Double getScoreForType( SearchHit searchHit, String type ) throws Throwable {
 				
 		for( NameValueType searchScore : searchHit.getSearchScore() ) {
