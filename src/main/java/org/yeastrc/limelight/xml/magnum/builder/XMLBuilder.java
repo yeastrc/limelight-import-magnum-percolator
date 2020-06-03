@@ -370,18 +370,16 @@ public class XMLBuilder {
 						}
 						
 						
-						// add in the mods for this psm
-						if( magnumPSM.getModifications() != null && magnumPSM.getModifications().keySet().size() > 0 ) {
-								
-							PsmModifications xmlPSMModifications = new PsmModifications();
-							xmlPsm.setPsmModifications( xmlPSMModifications );
-								
-							for( int position : magnumPSM.getModifications().keySet() ) {
-								PsmModification xmlPSMModification = new PsmModification();
-								xmlPSMModifications.getPsmModification().add( xmlPSMModification );
-																
-								xmlPSMModification.setMass( magnumPSM.getModifications().get( position ) );
-								xmlPSMModification.setPosition( new BigInteger( String.valueOf( position ) ) );
+						// add in open mod
+						if(magnumPSM.getOpenModification() != null) {
+							PsmOpenModification xmlPsmOpenModifcation = new PsmOpenModification();
+							xmlPsm.setPsmOpenModification( xmlPsmOpenModifcation );
+							xmlPsmOpenModifcation.setMass(magnumPSM.getOpenModification().getMass());
+
+							for(int position : magnumPSM.getOpenModification().getPositions()) {
+								PsmOpenModificationPosition xmlPsmOpenModifcationPosition = new PsmOpenModificationPosition();
+								xmlPsmOpenModifcation.getPsmOpenModificationPosition().add(xmlPsmOpenModifcationPosition);
+								xmlPsmOpenModifcationPosition.setPosition(BigInteger.valueOf(position));
 							}
 						}
 

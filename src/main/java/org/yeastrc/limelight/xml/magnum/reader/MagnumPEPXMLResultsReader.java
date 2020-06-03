@@ -16,6 +16,7 @@ import org.yeastrc.limelight.xml.magnum.constants.MagnumConstants;
 import org.yeastrc.limelight.xml.magnum.objects.MagnumPSM;
 import org.yeastrc.limelight.xml.magnum.objects.MagnumParameters;
 import org.yeastrc.limelight.xml.magnum.objects.MagnumResults;
+import org.yeastrc.limelight.xml.magnum.objects.OpenModification;
 import org.yeastrc.limelight.xml.magnum.utils.ModParsingUtils;
 
 import net.systemsbiology.regis_web.pepxml.ModInfoDataType;
@@ -147,7 +148,8 @@ public class MagnumPEPXMLResultsReader {
 		psm.seteValue( getScoreForType( searchHit, MagnumConstants.PSM_SCORE_E_VALUE ) );
 
 		psm.setReporterIons( getReporterIonsForSearchHit( searchHit ) );
-		
+		psm.setOpenModification(getOpenModificationForSearchHit(searchHit));
+
 		try {
 			psm.setModifications( getModificationsForSearchHit( searchHit ) );
 		} catch( Throwable t ) {
@@ -183,6 +185,12 @@ public class MagnumPEPXMLResultsReader {
 				if( mod.getStatic() != null ) {
 					continue;
 				}
+
+				// skip open mods
+				if(isOpenMod(mod)) {
+					continue;
+				}
+
 				BigDecimal modMass = BigDecimal.valueOf( mod.getVariable() );
 								
 				modMap.put( mod.getPosition().intValueExact(), modMass );
@@ -190,6 +198,44 @@ public class MagnumPEPXMLResultsReader {
 		}
 		
 		return modMap;
+	}
+
+	/**
+	 * Get open modification for search hit, if any
+	 *
+	 * @param searchHit
+	 * @return The OpenModification, null if none was found
+	 */
+	private static OpenModification getOpenModificationForSearchHit( SearchHit searchHit ) {
+
+		ModInfoDataType mofo = searchHit.getModificationInfo();
+		if( mofo != null ) {
+			for( ModAminoacidMass mod : mofo.getModAminoacidMass() ) {
+
+				if(isOpenMod(mod)) {
+					BigDecimal modMass = BigDecimal.valueOf( mod.getVariable() );
+					int position = mod.getPosition().intValueExact();
+
+					Collection<Integer> positions = new HashSet<>();
+					positions.add(position);
+
+					return new OpenModification(modMass, positions);
+				}
+			}
+		}
+
+		return null;
+	}
+
+
+	/**
+	 * Return true if the mod is an open mod
+	 *
+	 * @param xmlModAminoAcidMass
+	 * @return
+	 */
+	private static boolean isOpenMod(ModAminoacidMass xmlModAminoAcidMass) {
+		return xmlModAminoAcidMass.equals("adduct");
 	}
 
 	private static Collection<BigDecimal> getReporterIonsForSearchHit( SearchHit searchHit ) throws Throwable {
