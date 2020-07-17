@@ -23,19 +23,27 @@ import java.util.Collection;
 import java.util.Map;
 
 public class MagnumPSM {
-	
-	
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
+
+
 	@Override
 	public String toString() {
-		return "MagnumPSM [retentionTime=" + retentionTime + ", scanNumber=" + scanNumber + ", charge=" + charge
-				+ ", reportedPeptide=" + reportedPeptide + ", observedMass=" + observedMass + ", ppmError=" + ppmError
-				+ ", eValue=" + eValue + ", score=" + score + ", dScore=" + dScore + ", peptideSequence="
-				+ peptideSequence + ", modifications=" + modifications + "]";
+		return "MagnumPSM{" +
+				"retentionTime=" + retentionTime +
+				", scanNumber=" + scanNumber +
+				", charge=" + charge +
+				", reportedPeptide='" + reportedPeptide + '\'' +
+				", observedMass=" + observedMass +
+				", ppmError=" + ppmError +
+				", eValue=" + eValue +
+				", score=" + score +
+				", dScore=" + dScore +
+				", peptideSequence='" + peptideSequence + '\'' +
+				", modifications=" + modifications +
+				", reporterIons=" + reporterIons +
+				", massDiff=" + massDiff +
+				'}';
 	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -264,7 +272,17 @@ public class MagnumPSM {
 	private double eValue;
 	private double score;
 	private double dScore;
+
+	public BigDecimal getMassDiff() {
+		return massDiff;
+	}
+
+	public void setMassDiff(BigDecimal massDiff) {
+		this.massDiff = massDiff;
+	}
+
 	private String peptideSequence;
 	private Map<Integer, BigDecimal> modifications;
 	private Collection<BigDecimal> reporterIons;
+	private BigDecimal massDiff;
 }

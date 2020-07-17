@@ -35,6 +35,7 @@ public class PSMAnnotationTypes {
 	public static final String MAGNUM_ANNOTATION_TYPE_SCORE = "Score";
 	public static final String MAGNUM_ANNOTATION_TYPE_DSCORE = "dScore";
 	public static final String MAGNUM_ANNOTATION_TYPE_PPMERROR = "PPM Error";
+	public static final String MAGNUM_ANNOTATION_TYPE_MASSDIFF = "Mass Diff";
 
 	// percolator scores
 	public static final String PERCOLATOR_ANNOTATION_TYPE_QVALUE = "q-value";
@@ -82,6 +83,15 @@ public class PSMAnnotationTypes {
 				type.setDescription( "PPM Error, as calculated by " + Constants.PROGRAM_NAME_MAGNUM );
 				type.setFilterDirection( FilterDirectionType.ABOVE );
 				
+				types.add( type );
+			}
+
+			{
+				FilterablePsmAnnotationType type = new FilterablePsmAnnotationType();
+				type.setName( MAGNUM_ANNOTATION_TYPE_MASSDIFF );
+				type.setDescription( "PPM Error, as calculated by " + Constants.PROGRAM_NAME_MAGNUM );
+				type.setFilterDirection( FilterDirectionType.BELOW );
+
 				types.add( type );
 			}
 			

@@ -138,6 +138,7 @@ public class MagnumPEPXMLResultsReader {
 		psm.setScanNumber( scanNumber );
 		psm.setObservedMass( obsMass );
 		psm.setRetentionTime( retentionTime );
+		psm.setMassDiff(searchHit.getMassdiff());
 		
 		psm.setPeptideSequence( searchHit.getPeptide() );
 		
