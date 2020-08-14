@@ -77,9 +77,9 @@ public class MagnumPEPXMLResultsReader {
 							throw t;
 							
 						}
-						
+
 						String psmReportedPeptide = ModParsingUtils.getRoundedReportedPeptideString( psm.getPeptideSequence(), psm.getModifications() );
-						
+
 						if( !results.getMagnumResultMap().containsKey( psmReportedPeptide ) )
 							results.getMagnumResultMap().put( psmReportedPeptide, new HashMap<>() );
 						
@@ -239,7 +239,7 @@ public class MagnumPEPXMLResultsReader {
 	 * @return
 	 */
 	private static boolean isOpenMod(ModAminoacidMass xmlModAminoAcidMass) {
-		return xmlModAminoAcidMass.equals("adduct");
+		return xmlModAminoAcidMass.getSource().equals("adduct");
 	}
 
 	private static Collection<BigDecimal> getReporterIonsForSearchHit( SearchHit searchHit ) throws Throwable {

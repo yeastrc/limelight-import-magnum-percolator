@@ -24,25 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 
 public class MagnumPSM {
-	@Override
-	public String toString() {
-		return "MagnumPSM{" +
-				"retentionTime=" + retentionTime +
-				", scanNumber=" + scanNumber +
-				", charge=" + charge +
-				", reportedPeptide='" + reportedPeptide + '\'' +
-				", observedMass=" + observedMass +
-				", ppmError=" + ppmError +
-				", eValue=" + eValue +
-				", score=" + score +
-				", dScore=" + dScore +
-				", peptideSequence='" + peptideSequence + '\'' +
-				", modifications=" + modifications +
-				", reporterIons=" + reporterIons +
-				", openModification=" + openModification +
-				", massDiff=" + massDiff +
-				'}';
-	}
 
 	/**
 	 * @return the retentionTime
@@ -67,18 +48,6 @@ public class MagnumPSM {
 	 */
 	public void setScanNumber(int scanNumber) {
 		this.scanNumber = scanNumber;
-	}
-	/**
-	 * @return the reportedPeptide
-	 */
-	public String getReportedPeptide() {
-		return reportedPeptide;
-	}
-	/**
-	 * @param reportedPeptide the reportedPeptide to set
-	 */
-	public void setReportedPeptide(String reportedPeptide) {
-		this.reportedPeptide = reportedPeptide;
 	}
 	/**
 	 * @return the observedMass
@@ -190,31 +159,6 @@ public class MagnumPSM {
 		this.reporterIons = reporterIons;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		MagnumPSM magnumPSM = (MagnumPSM) o;
-		return Double.compare(magnumPSM.retentionTime, retentionTime) == 0 &&
-				scanNumber == magnumPSM.scanNumber &&
-				charge == magnumPSM.charge &&
-				Double.compare(magnumPSM.observedMass, observedMass) == 0 &&
-				Double.compare(magnumPSM.ppmError, ppmError) == 0 &&
-				Double.compare(magnumPSM.eValue, eValue) == 0 &&
-				Double.compare(magnumPSM.score, score) == 0 &&
-				Double.compare(magnumPSM.dScore, dScore) == 0 &&
-				reportedPeptide.equals(magnumPSM.reportedPeptide) &&
-				peptideSequence.equals(magnumPSM.peptideSequence) &&
-				Objects.equals(modifications, magnumPSM.modifications) &&
-				Objects.equals(reporterIons, magnumPSM.reporterIons) &&
-				Objects.equals(openModification, magnumPSM.openModification);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(retentionTime, scanNumber, charge, reportedPeptide, observedMass, ppmError, eValue, score, dScore, peptideSequence, modifications, reporterIons, openModification);
-	}
-
 	public OpenModification getOpenModification() {
 		return openModification;
 	}
@@ -234,7 +178,51 @@ public class MagnumPSM {
 	private double retentionTime;
 	private int scanNumber;
 	private int charge;
-	private String reportedPeptide;
+
+	@Override
+	public String toString() {
+		return "MagnumPSM{" +
+				"retentionTime=" + retentionTime +
+				", scanNumber=" + scanNumber +
+				", charge=" + charge +
+				", observedMass=" + observedMass +
+				", ppmError=" + ppmError +
+				", eValue=" + eValue +
+				", score=" + score +
+				", dScore=" + dScore +
+				", peptideSequence='" + peptideSequence + '\'' +
+				", modifications=" + modifications +
+				", reporterIons=" + reporterIons +
+				", openModification=" + openModification +
+				", massDiff=" + massDiff +
+				'}';
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		MagnumPSM magnumPSM = (MagnumPSM) o;
+		return Double.compare(magnumPSM.retentionTime, retentionTime) == 0 &&
+				scanNumber == magnumPSM.scanNumber &&
+				charge == magnumPSM.charge &&
+				Double.compare(magnumPSM.observedMass, observedMass) == 0 &&
+				Double.compare(magnumPSM.ppmError, ppmError) == 0 &&
+				Double.compare(magnumPSM.eValue, eValue) == 0 &&
+				Double.compare(magnumPSM.score, score) == 0 &&
+				Double.compare(magnumPSM.dScore, dScore) == 0 &&
+				Objects.equals(peptideSequence, magnumPSM.peptideSequence) &&
+				Objects.equals(modifications, magnumPSM.modifications) &&
+				Objects.equals(reporterIons, magnumPSM.reporterIons) &&
+				Objects.equals(openModification, magnumPSM.openModification) &&
+				Objects.equals(massDiff, magnumPSM.massDiff);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(retentionTime, scanNumber, charge, observedMass, ppmError, eValue, score, dScore, peptideSequence, modifications, reporterIons, openModification, massDiff);
+	}
+
 	private double observedMass;
 	private double ppmError;
 	private double eValue;

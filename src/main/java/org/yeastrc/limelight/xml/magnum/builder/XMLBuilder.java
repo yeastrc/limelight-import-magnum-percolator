@@ -383,10 +383,12 @@ public class XMLBuilder {
 							xmlPsm.setPsmOpenModification( xmlPsmOpenModifcation );
 							xmlPsmOpenModifcation.setMass(magnumPSM.getOpenModification().getMass());
 
-							for(int position : magnumPSM.getOpenModification().getPositions()) {
-								PsmOpenModificationPosition xmlPsmOpenModifcationPosition = new PsmOpenModificationPosition();
-								xmlPsmOpenModifcation.getPsmOpenModificationPosition().add(xmlPsmOpenModifcationPosition);
-								xmlPsmOpenModifcationPosition.setPosition(BigInteger.valueOf(position));
+							if( magnumPSM.getOpenModification().getPositions() != null) {
+								for (int position : magnumPSM.getOpenModification().getPositions()) {
+									PsmOpenModificationPosition xmlPsmOpenModifcationPosition = new PsmOpenModificationPosition();
+									xmlPsmOpenModifcation.getPsmOpenModificationPosition().add(xmlPsmOpenModifcationPosition);
+									xmlPsmOpenModifcationPosition.setPosition(BigInteger.valueOf(position));
+								}
 							}
 						}
 
