@@ -24,6 +24,25 @@ import java.util.Map;
 import java.util.Objects;
 
 public class MagnumPSM {
+	@Override
+	public String toString() {
+		return "MagnumPSM{" +
+				"retentionTime=" + retentionTime +
+				", scanNumber=" + scanNumber +
+				", charge=" + charge +
+				", reportedPeptide='" + reportedPeptide + '\'' +
+				", observedMass=" + observedMass +
+				", ppmError=" + ppmError +
+				", eValue=" + eValue +
+				", score=" + score +
+				", dScore=" + dScore +
+				", peptideSequence='" + peptideSequence + '\'' +
+				", modifications=" + modifications +
+				", reporterIons=" + reporterIons +
+				", openModification=" + openModification +
+				", massDiff=" + massDiff +
+				'}';
+	}
 
 	/**
 	 * @return the retentionTime
@@ -196,31 +215,20 @@ public class MagnumPSM {
 		return Objects.hash(retentionTime, scanNumber, charge, reportedPeptide, observedMass, ppmError, eValue, score, dScore, peptideSequence, modifications, reporterIons, openModification);
 	}
 
-	@Override
-	public String toString() {
-		return "MagnumPSM{" +
-				"retentionTime=" + retentionTime +
-				", scanNumber=" + scanNumber +
-				", charge=" + charge +
-				", reportedPeptide='" + reportedPeptide + '\'' +
-				", observedMass=" + observedMass +
-				", ppmError=" + ppmError +
-				", eValue=" + eValue +
-				", score=" + score +
-				", dScore=" + dScore +
-				", peptideSequence='" + peptideSequence + '\'' +
-				", modifications=" + modifications +
-				", reporterIons=" + reporterIons +
-				", openModification=" + openModification +
-				'}';
-	}
-
 	public OpenModification getOpenModification() {
 		return openModification;
 	}
 
 	public void setOpenModification(OpenModification openModification) {
 		this.openModification = openModification;
+	}
+
+	public BigDecimal getMassDiff() {
+		return massDiff;
+	}
+
+	public void setMassDiff(BigDecimal massDiff) {
+		this.massDiff = massDiff;
 	}
 
 	private double retentionTime;
@@ -236,4 +244,6 @@ public class MagnumPSM {
 	private Map<Integer, BigDecimal> modifications;
 	private Collection<BigDecimal> reporterIons;
 	private OpenModification openModification;
+	private BigDecimal massDiff;
+
 }

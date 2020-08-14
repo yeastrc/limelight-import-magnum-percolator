@@ -139,7 +139,8 @@ public class MagnumPEPXMLResultsReader {
 		psm.setScanNumber( scanNumber );
 		psm.setObservedMass( obsMass );
 		psm.setRetentionTime( retentionTime );
-		
+		psm.setMassDiff(searchHit.getMassdiff());
+
 		psm.setPeptideSequence( searchHit.getPeptide() );
 		
 		psm.setScore( getScoreForType( searchHit, MagnumConstants.PSM_SCORE_MAGNUM_SCORE ) );
@@ -224,7 +225,10 @@ public class MagnumPEPXMLResultsReader {
 			}
 		}
 
-		return null;
+		// if we get here, just return the mass diff as an unlocalized open mod
+		BigDecimal massDiff = searchHit.getMassdiff();
+		return new OpenModification(massDiff, null);
+
 	}
 
 
