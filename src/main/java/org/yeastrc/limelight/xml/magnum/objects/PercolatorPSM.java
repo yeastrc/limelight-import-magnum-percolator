@@ -18,6 +18,8 @@
 
 package org.yeastrc.limelight.xml.magnum.objects;
 
+import java.util.Objects;
+
 public class PercolatorPSM {
 	
 	
@@ -31,37 +33,24 @@ public class PercolatorPSM {
 				+ ", reportedPeptide=" + reportedPeptide + ", psmId=" + psmId + ", scanNumber=" + scanNumber + "]";
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		PercolatorPSM that = (PercolatorPSM) o;
+		return Double.compare(that.svmScore, svmScore) == 0 &&
+				Double.compare(that.qValue, qValue) == 0 &&
+				Double.compare(that.pValue, pValue) == 0 &&
+				Double.compare(that.pep, pep) == 0 &&
+				scanNumber == that.scanNumber &&
+				Objects.equals(reportedPeptide, that.reportedPeptide);
+	}
+
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((psmId == null) ? 0 : psmId.hashCode());
-		return result;
+		return Objects.hash(svmScore, qValue, pValue, pep, reportedPeptide, scanNumber);
 	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		PercolatorPSM other = (PercolatorPSM) obj;
-		if (psmId == null) {
-			if (other.psmId != null)
-				return false;
-		} else if (!psmId.equals(other.psmId))
-			return false;
-		return true;
-	}
-	
+
 	/**
 	 * @return the svmScore
 	 */
