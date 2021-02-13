@@ -138,7 +138,7 @@ public class MagnumPEPXMLResultsReader {
 		psm.setCharge( charge );
 		psm.setScanNumber( scanNumber );
 		psm.setObservedMass( obsMass );
-		psm.setRetentionTime( retentionTime );
+		psm.setRetentionTime( retentionTime * 60 );	// looks like it may be reported as minutes, we want seconds
 		psm.setMassDiff(searchHit.getMassdiff());
 
 		psm.setPeptideSequence( searchHit.getPeptide() );
