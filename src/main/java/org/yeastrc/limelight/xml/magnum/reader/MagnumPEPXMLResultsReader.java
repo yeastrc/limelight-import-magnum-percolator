@@ -138,12 +138,12 @@ public class MagnumPEPXMLResultsReader {
 		psm.setCharge( charge );
 		psm.setScanNumber( scanNumber );
 		psm.setObservedMass( obsMass );
-		psm.setRetentionTime( retentionTime * 60 );	// looks like it may be reported as minutes, we want seconds
+		psm.setRetentionTime( retentionTime );
 		psm.setMassDiff(searchHit.getMassdiff());
 
 		psm.setPeptideSequence( searchHit.getPeptide() );
 		
-		psm.setScore( getScoreForType( searchHit, MagnumConstants.PSM_SCORE_MAGNUM_SCORE ) );
+		psm.setmScore( getScoreForType( searchHit, MagnumConstants.PSM_SCORE_MAGNUM_SCORE ) );
 		psm.setdScore( getScoreForType( searchHit, MagnumConstants.PSM_SCORE_DELTA_SCORE ) );
 		psm.setPpmError( getScoreForType( searchHit, MagnumConstants.PSM_SCORE_PPM_ERROR ) );
 		psm.seteValue( getScoreForType( searchHit, MagnumConstants.PSM_SCORE_E_VALUE ) );
@@ -247,15 +247,11 @@ public class MagnumPEPXMLResultsReader {
 		Collection<BigDecimal> reporterIons = new HashSet<>();
 
 		for( NameValueType searchScore : searchHit.getSearchScore() ) {
-			if( searchScore.getName().equals( MagnumConstants.PSM_SCORE_REPORTER_IONS ) ) {
+			if( searchScore.getName().equals( MagnumConstants.PSM_SCORE_REPORTER_ION ) ) {
 
-				String reportedReporterIons = searchScore.getValueAttribute();
-				if( reportedReporterIons.length() > 0 && !reportedReporterIons.equals( "-" )) {
-					String[] values = reportedReporterIons.split(",");
-					for( String ri : values ) {
-						reporterIons.add( new BigDecimal( ri ) );
-					}
-				}
+				String reportedReporterIon = searchScore.getValueAttribute();
+				reporterIons.add( new BigDecimal( reportedReporterIon ) );
+
 			}
 		}
 

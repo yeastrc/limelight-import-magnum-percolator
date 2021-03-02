@@ -28,7 +28,6 @@ import org.yeastrc.limelight.xml.magnum.objects.PercolatorPeptideResult;
 import org.yeastrc.limelight.xml.magnum.objects.PercolatorPeptideStats;
 import org.yeastrc.limelight.xml.magnum.objects.PercolatorResults;
 import org.yeastrc.limelight.xml.magnum.utils.MassUtils;
-import org.yeastrc.limelight.xml.magnum.utils.ModParsingUtils;
 import org.yeastrc.limelight.xml.magnum.utils.ReportedPeptideParsingUtils;
 
 
@@ -315,9 +314,9 @@ public class XMLBuilder {
 							FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
 							xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
 							
-							xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_SCORE );
+							xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_MSCORE );
 							xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_MAGNUM );
-							xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( magnumPSM.getScore()) );
+							xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( magnumPSM.getmScore()) );
 						}
 						{
 							FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();

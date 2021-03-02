@@ -88,14 +88,14 @@ public class MagnumPSM {
 	/**
 	 * @return the score
 	 */
-	public double getScore() {
-		return score;
+	public double getmScore() {
+		return mScore;
 	}
 	/**
-	 * @param score the score to set
+	 * @param mScore the score to set
 	 */
-	public void setScore(double score) {
-		this.score = score;
+	public void setmScore(double mScore) {
+		this.mScore = mScore;
 	}
 	/**
 	 * @return the dScore
@@ -188,7 +188,7 @@ public class MagnumPSM {
 				", observedMass=" + observedMass +
 				", ppmError=" + ppmError +
 				", eValue=" + eValue +
-				", score=" + score +
+				", score=" + mScore +
 				", dScore=" + dScore +
 				", peptideSequence='" + peptideSequence + '\'' +
 				", modifications=" + modifications +
@@ -209,7 +209,7 @@ public class MagnumPSM {
 				Double.compare(magnumPSM.observedMass, observedMass) == 0 &&
 				Double.compare(magnumPSM.ppmError, ppmError) == 0 &&
 				Double.compare(magnumPSM.eValue, eValue) == 0 &&
-				Double.compare(magnumPSM.score, score) == 0 &&
+				Double.compare(magnumPSM.mScore, mScore) == 0 &&
 				Double.compare(magnumPSM.dScore, dScore) == 0 &&
 				Objects.equals(peptideSequence, magnumPSM.peptideSequence) &&
 				Objects.equals(modifications, magnumPSM.modifications) &&
@@ -220,13 +220,13 @@ public class MagnumPSM {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(retentionTime, scanNumber, charge, observedMass, ppmError, eValue, score, dScore, peptideSequence, modifications, reporterIons, openModification, massDiff);
+		return Objects.hash(retentionTime, scanNumber, charge, observedMass, ppmError, eValue, mScore, dScore, peptideSequence, modifications, reporterIons, openModification, massDiff);
 	}
 
 	private double observedMass;
 	private double ppmError;
 	private double eValue;
-	private double score;
+	private double mScore;
 	private double dScore;
 	private String peptideSequence;
 	private Map<Integer, BigDecimal> modifications;

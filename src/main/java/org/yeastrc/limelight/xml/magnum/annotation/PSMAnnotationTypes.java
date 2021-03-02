@@ -31,9 +31,9 @@ import org.yeastrc.limelight.xml.magnum.constants.Constants;
 public class PSMAnnotationTypes {
 
 	// magnum scores
-	public static final String MAGNUM_ANNOTATION_TYPE_EVALUE = "E-Value";
-	public static final String MAGNUM_ANNOTATION_TYPE_SCORE = "Score";
-	public static final String MAGNUM_ANNOTATION_TYPE_DSCORE = "dScore";
+	public static final String MAGNUM_ANNOTATION_TYPE_EVALUE = "Evalue";
+	public static final String MAGNUM_ANNOTATION_TYPE_MSCORE = "Mscore";
+	public static final String MAGNUM_ANNOTATION_TYPE_DSCORE = "Dscore";
 	public static final String MAGNUM_ANNOTATION_TYPE_PPMERROR = "PPM Error";
 	public static final String MAGNUM_ANNOTATION_TYPE_MASSDIFF = "Mass Diff";
 
@@ -62,8 +62,8 @@ public class PSMAnnotationTypes {
 			
 			{
 				FilterablePsmAnnotationType type = new FilterablePsmAnnotationType();
-				type.setName( MAGNUM_ANNOTATION_TYPE_SCORE );
-				type.setDescription( "Cross-correlation coefficient" );
+				type.setName( MAGNUM_ANNOTATION_TYPE_MSCORE );
+				type.setDescription( "Magnum Score: Cross-correlation coefficient" );
 				type.setFilterDirection( FilterDirectionType.ABOVE );
 	
 				types.add( type );
