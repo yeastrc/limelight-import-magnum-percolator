@@ -64,7 +64,7 @@ jar {
 }
 
 shadowJar {
-    baseName = 'magnumToLimelightXML'
+    baseName = 'magnumPreAlphaToLimelightXML'
     classifier = null
     version = null
 }
