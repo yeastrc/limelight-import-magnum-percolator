@@ -19,6 +19,7 @@
 package org.yeastrc.limelight.xml.magnum.objects;
 
 import java.io.File;
+import java.math.BigDecimal;
 
 public class ConversionParameters {
 		
@@ -96,7 +97,13 @@ public class ConversionParameters {
 		this.limelightXMLOutputFile = limelightXMLOutputFile;
 	}
 
+	public BigDecimal getqValueOverride() {
+		return qValueOverride;
+	}
 
+	public void setqValueOverride(BigDecimal qValueOverride) {
+		this.qValueOverride = qValueOverride;
+	}
 
 	private File fastaFile;
 	private File magnumParametersFile;
@@ -104,5 +111,6 @@ public class ConversionParameters {
 	private File magnumOutputFile;
 	private File limelightXMLOutputFile;
 	private ConversionProgramInfo conversionProgramInfo;
+	private BigDecimal qValueOverride;
 	
 }

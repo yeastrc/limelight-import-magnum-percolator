@@ -21,6 +21,7 @@ package org.yeastrc.limelight.xml.magnum.main;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 
 import org.yeastrc.limelight.xml.magnum.constants.Constants;
 import org.yeastrc.limelight.xml.magnum.objects.ConversionParameters;
@@ -48,6 +49,9 @@ public class MainProgram implements Runnable {
 
 	@CommandLine.Option(names = { "-f", "--fasta-file" }, required = true, description = "Full path to FASTA file used in the experiment.")
 	private File fastaFile;
+
+	@CommandLine.Option(names = { "-q", "--q-value" }, required = false, description = "(Optional) Override the default q-value cutoff to this value.")
+	private BigDecimal qValueOverride;
 
 	@CommandLine.Option(names = { "-c", "--conf" },  required = true, description = "Full path to the Magnum params file.")
 	private File confFile;
@@ -93,6 +97,7 @@ public class MainProgram implements Runnable {
         cp.setMagnumOutputFile( magnumFile );
         cp.setPercolatorXMLOutputFile( percolatorFile );
         cp.setLimelightXMLOutputFile( outFile );
+        cp.setqValueOverride( qValueOverride );
 
         try {
 			ConverterRunner.createInstance().convertMagnumToLimelightXML(cp);
