@@ -21,16 +21,19 @@ package org.yeastrc.limelight.xml.magnum.objects;
 import java.util.Objects;
 
 public class PercolatorPSM {
-	
-	
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
+
 	@Override
 	public String toString() {
-		return "PercolatorPSM [svmScore=" + svmScore + ", qValue=" + qValue + ", pValue=" + pValue + ", pep=" + pep
-				+ ", reportedPeptide=" + reportedPeptide + ", psmId=" + psmId + ", scanNumber=" + scanNumber + "]";
+		return "PercolatorPSM{" +
+				"svmScore=" + svmScore +
+				", qValue=" + qValue +
+				", pValue=" + pValue +
+				", pep=" + pep +
+				", reportedPeptide='" + reportedPeptide + '\'' +
+				", psmId='" + psmId + '\'' +
+				", scanNumber=" + scanNumber +
+				", isOpenModResult=" + isOpenModResult +
+				'}';
 	}
 
 	@Override
@@ -38,17 +41,23 @@ public class PercolatorPSM {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		PercolatorPSM that = (PercolatorPSM) o;
-		return Double.compare(that.svmScore, svmScore) == 0 &&
-				Double.compare(that.qValue, qValue) == 0 &&
-				Double.compare(that.pValue, pValue) == 0 &&
-				Double.compare(that.pep, pep) == 0 &&
-				scanNumber == that.scanNumber &&
-				Objects.equals(reportedPeptide, that.reportedPeptide);
+		return scanNumber == that.scanNumber &&
+				isOpenModResult == that.isOpenModResult &&
+				Objects.equals(reportedPeptide, that.reportedPeptide) &&
+				psmId.equals(that.psmId);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(svmScore, qValue, pValue, pep, reportedPeptide, scanNumber);
+		return Objects.hash(reportedPeptide, psmId, scanNumber, isOpenModResult);
+	}
+
+	public boolean isOpenModResult() {
+		return isOpenModResult;
+	}
+
+	public void setOpenModResult(boolean openModResult) {
+		isOpenModResult = openModResult;
 	}
 
 	/**
@@ -142,4 +151,5 @@ public class PercolatorPSM {
 	private String reportedPeptide;
 	private String psmId;
 	private int scanNumber;
+	private boolean isOpenModResult = false;
 }

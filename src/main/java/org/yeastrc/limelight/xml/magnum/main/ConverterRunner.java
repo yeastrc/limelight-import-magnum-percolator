@@ -28,6 +28,7 @@ import org.yeastrc.limelight.xml.magnum.reader.MagnumPEPXMLResultsReader;
 import org.yeastrc.limelight.xml.magnum.reader.PercolatorResultsReader;
 import org.yeastrc.limelight.xml.magnum.utils.DataComparer;
 import org.yeastrc.limelight.xml.magnum.utils.MagnumParsingUtils;
+import org.yeastrc.limelight.xml.magnum.utils.PercolatorDataCombiner;
 
 public class ConverterRunner {
 
@@ -45,12 +46,30 @@ public class ConverterRunner {
 		System.err.print( "Reading Magnum data into memory..." );
 		MagnumResults magnumResults = MagnumPEPXMLResultsReader.getMagnumResults( conversionParameters.getMagnumOutputFile(), magParams );
 		System.err.println( " Done." );
-		
-		
-		System.err.print( "Reading Percolator data into memory..." );
-		PercolatorResults percolatorResults = PercolatorResultsReader.getPercolatorResults( conversionParameters.getPercolatorXMLOutputFile() );
-		System.err.println( " Done." );
-		
+
+		PercolatorResults percolatorResults = null;
+
+		if(conversionParameters.getOpenModsSeparate()) {
+
+			System.err.print( "Reading open mods Percolator data into memory..." );
+			PercolatorResults openModsPercolatorResults = PercolatorResultsReader.getPercolatorResults( conversionParameters.getOpenModsPercolatorXMLOutputFile(), true );
+			System.err.println( " Done." );
+
+			System.err.print( "Reading standard Percolator data into memory..." );
+			PercolatorResults standardPercolatorResults = PercolatorResultsReader.getPercolatorResults( conversionParameters.getStandardPercolatorXMLOutputFile(), false );
+			System.err.println( " Done." );
+
+			// combine these into a single set of results
+			System.err.print( "Combining Percolator data..." );
+			percolatorResults = PercolatorDataCombiner.combineData(openModsPercolatorResults, standardPercolatorResults);
+			System.err.println( " Done." );
+
+		} else {
+
+			System.err.print( "Reading Percolator data into memory..." );
+			percolatorResults = PercolatorResultsReader.getPercolatorResults( conversionParameters.getPercolatorXMLOutputFile(), false );
+			System.err.println( " Done." );
+		}
 		
 		System.err.print( "Ensuring Percolator and magnum data match up..." );
 		MagnumParsingUtils.mapMagnumPSMsToPercolatorReportedPeptides( magnumResults, percolatorResults );

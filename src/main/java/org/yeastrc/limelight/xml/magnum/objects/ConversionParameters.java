@@ -22,7 +22,31 @@ import java.io.File;
 import java.math.BigDecimal;
 
 public class ConversionParameters {
-		
+
+	public File getOpenModsPercolatorXMLOutputFile() {
+		return openModsPercolatorXMLOutputFile;
+	}
+
+	public void setOpenModsPercolatorXMLOutputFile(File openModsPercolatorXMLOutputFile) {
+		this.openModsPercolatorXMLOutputFile = openModsPercolatorXMLOutputFile;
+	}
+
+	public File getStandardPercolatorXMLOutputFile() {
+		return standardPercolatorXMLOutputFile;
+	}
+
+	public void setStandardPercolatorXMLOutputFile(File standardPercolatorXMLOutputFile) {
+		this.standardPercolatorXMLOutputFile = standardPercolatorXMLOutputFile;
+	}
+
+	public Boolean getOpenModsSeparate() {
+		return isOpenModsSeparate;
+	}
+
+	public void setOpenModsSeparate(Boolean openModsSeparate) {
+		isOpenModsSeparate = openModsSeparate;
+	}
+
 	/**
 	 * @return the fastaFile
 	 */
@@ -108,9 +132,12 @@ public class ConversionParameters {
 	private File fastaFile;
 	private File magnumParametersFile;
 	private File percolatorXMLOutputFile;
+	private File openModsPercolatorXMLOutputFile;
+	private File standardPercolatorXMLOutputFile;
 	private File magnumOutputFile;
 	private File limelightXMLOutputFile;
 	private ConversionProgramInfo conversionProgramInfo;
 	private BigDecimal qValueOverride;
+	private Boolean isOpenModsSeparate;
 	
 }

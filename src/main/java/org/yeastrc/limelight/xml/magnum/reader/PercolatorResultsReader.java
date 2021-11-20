@@ -46,13 +46,13 @@ public class PercolatorResultsReader {
 	 * @return
 	 * @throws Throwable
 	 */
-	public static PercolatorResults getPercolatorResults( File file ) throws Throwable {
+	public static PercolatorResults getPercolatorResults( File file, boolean isOpenMods ) throws Throwable {
 				
 		IPercolatorOutput po = getIPercolatorOutput( file );
 		
 		String version = getPercolatorVersion( po );
 		
-		Map<String, PercolatorPSM> psmIdPSMMap = getPercolatorPSMs( po );
+		Map<String, PercolatorPSM> psmIdPSMMap = getPercolatorPSMs( po, isOpenMods );
 		Map<String, PercolatorPeptideResult> peptideResults = getPercolatorPeptidePSMMap( po, psmIdPSMMap );
 		
 		psmIdPSMMap = null;
@@ -161,7 +161,7 @@ public class PercolatorResultsReader {
 	 * @param po
 	 * @return
 	 */
-	protected static Map<String, PercolatorPSM> getPercolatorPSMs( IPercolatorOutput po ) {
+	protected static Map<String, PercolatorPSM> getPercolatorPSMs( IPercolatorOutput po, boolean isOpenMods ) {
 		
 		Map<String, PercolatorPSM> psmIdPSMMap = new HashMap<>();
 		
@@ -169,6 +169,8 @@ public class PercolatorResultsReader {
 	    for( IPsm xpsm : po.getPsms().getPsm() ) {
 	    	
 	    	PercolatorPSM psm = getPercolatorPSMFromJAXB( xpsm );
+	    	psm.setOpenModResult(isOpenMods);
+
 	    	psmIdPSMMap.put( psm.getPsmId(), psm );
 
 	    }

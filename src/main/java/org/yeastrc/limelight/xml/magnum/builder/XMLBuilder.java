@@ -97,15 +97,16 @@ public class XMLBuilder {
 				filterablePsmAnnotationTypes.getFilterablePsmAnnotationType().add( annoType );
 			}
 			
-			
-			ReportedPeptideAnnotationTypes reportedPeptideAnnotationTypes = new ReportedPeptideAnnotationTypes();
-			searchProgram.setReportedPeptideAnnotationTypes( reportedPeptideAnnotationTypes );
+			if(!conversionParameters.getOpenModsSeparate()) {
+				ReportedPeptideAnnotationTypes reportedPeptideAnnotationTypes = new ReportedPeptideAnnotationTypes();
+				searchProgram.setReportedPeptideAnnotationTypes(reportedPeptideAnnotationTypes);
 
-			FilterableReportedPeptideAnnotationTypes filterableReportedPeptideAnnotationTypes = new FilterableReportedPeptideAnnotationTypes();
-			reportedPeptideAnnotationTypes.setFilterableReportedPeptideAnnotationTypes( filterableReportedPeptideAnnotationTypes );
-			
-			for( FilterableReportedPeptideAnnotationType annoType : PeptideAnnotationTypes.getFilterablePeptideAnnotationTypes( Constants.PROGRAM_NAME_PERCOLATOR ) ) {
-				filterableReportedPeptideAnnotationTypes.getFilterableReportedPeptideAnnotationType().add( annoType );
+				FilterableReportedPeptideAnnotationTypes filterableReportedPeptideAnnotationTypes = new FilterableReportedPeptideAnnotationTypes();
+				reportedPeptideAnnotationTypes.setFilterableReportedPeptideAnnotationTypes(filterableReportedPeptideAnnotationTypes);
+
+				for (FilterableReportedPeptideAnnotationType annoType : PeptideAnnotationTypes.getFilterablePeptideAnnotationTypes(Constants.PROGRAM_NAME_PERCOLATOR)) {
+					filterableReportedPeptideAnnotationTypes.getFilterableReportedPeptideAnnotationType().add(annoType);
+				}
 			}
 		}
 		
@@ -123,11 +124,13 @@ public class XMLBuilder {
 			xmlVisiblePsmAnnotations.getSearchAnnotation().add( sa );
 		}
 
-		VisibleReportedPeptideAnnotations xmlVisibleReportedPeptideAnnotations = new VisibleReportedPeptideAnnotations();
-		xmlDefaultVisibleAnnotations.setVisibleReportedPeptideAnnotations( xmlVisibleReportedPeptideAnnotations );
+		if(!conversionParameters.getOpenModsSeparate()) {
+			VisibleReportedPeptideAnnotations xmlVisibleReportedPeptideAnnotations = new VisibleReportedPeptideAnnotations();
+			xmlDefaultVisibleAnnotations.setVisibleReportedPeptideAnnotations(xmlVisibleReportedPeptideAnnotations);
 
-		for( SearchAnnotation sa : PeptideDefaultVisibleAnnotationTypes.getDefaultVisibleAnnotationTypes() ) {
-			xmlVisibleReportedPeptideAnnotations.getSearchAnnotation().add( sa );
+			for (SearchAnnotation sa : PeptideDefaultVisibleAnnotationTypes.getDefaultVisibleAnnotationTypes()) {
+				xmlVisibleReportedPeptideAnnotations.getSearchAnnotation().add(sa);
+			}
 		}
 		
 		//
@@ -142,12 +145,14 @@ public class XMLBuilder {
 		for( SearchAnnotation xmlSearchAnnotation : PSMAnnotationTypeSortOrder.getPSMAnnotationTypeSortOrder() ) {
 			xmlPsmAnnotationSortOrder.getSearchAnnotation().add( xmlSearchAnnotation );
 		}
-		
-		ReportedPeptideAnnotationSortOrder xmlReportedPeptideAnnotationSortOrder = new ReportedPeptideAnnotationSortOrder();
-		xmlAnnotationSortOrder.setReportedPeptideAnnotationSortOrder( xmlReportedPeptideAnnotationSortOrder );
-		
-		for( SearchAnnotation xmlSearchAnnotation : PeptideAnnotationTypeSortOrder.getPeptideAnnotationTypeSortOrder() ) {
-			xmlReportedPeptideAnnotationSortOrder.getSearchAnnotation().add( xmlSearchAnnotation );
+
+		if(!conversionParameters.getOpenModsSeparate()) {
+			ReportedPeptideAnnotationSortOrder xmlReportedPeptideAnnotationSortOrder = new ReportedPeptideAnnotationSortOrder();
+			xmlAnnotationSortOrder.setReportedPeptideAnnotationSortOrder(xmlReportedPeptideAnnotationSortOrder);
+
+			for (SearchAnnotation xmlSearchAnnotation : PeptideAnnotationTypeSortOrder.getPeptideAnnotationTypeSortOrder()) {
+				xmlReportedPeptideAnnotationSortOrder.getSearchAnnotation().add(xmlSearchAnnotation);
+			}
 		}
 
 		
@@ -191,49 +196,51 @@ public class XMLBuilder {
 			xmlReportedPeptide.setReportedPeptideString( percolatorReportedPeptide );
 			xmlReportedPeptide.setSequence( parsedPeptide.getNakedSequence() );
 
-			
-			// add in the filterable peptide annotations (e.g., q-value)
-			ReportedPeptideAnnotations xmlReportedPeptideAnnotations = new ReportedPeptideAnnotations();
-			xmlReportedPeptide.setReportedPeptideAnnotations( xmlReportedPeptideAnnotations );
-			
-			FilterableReportedPeptideAnnotations xmlFilterableReportedPeptideAnnotations = new FilterableReportedPeptideAnnotations();
-			xmlReportedPeptideAnnotations.setFilterableReportedPeptideAnnotations( xmlFilterableReportedPeptideAnnotations );
-			
-			// handle q-value
-			{
-				FilterableReportedPeptideAnnotation xmlFilterableReportedPeptideAnnotation = new FilterableReportedPeptideAnnotation();
-				xmlFilterableReportedPeptideAnnotations.getFilterableReportedPeptideAnnotation().add( xmlFilterableReportedPeptideAnnotation );
-				
-				xmlFilterableReportedPeptideAnnotation.setAnnotationName( PeptideAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_QVALUE );
-				xmlFilterableReportedPeptideAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
-				xmlFilterableReportedPeptideAnnotation.setValue( BigDecimal.valueOf( peptideStats.getqValue()) );
-			}
-			// handle p-value
-			{
-				FilterableReportedPeptideAnnotation xmlFilterableReportedPeptideAnnotation = new FilterableReportedPeptideAnnotation();
-				xmlFilterableReportedPeptideAnnotations.getFilterableReportedPeptideAnnotation().add( xmlFilterableReportedPeptideAnnotation );
-				
-				xmlFilterableReportedPeptideAnnotation.setAnnotationName( PeptideAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_PVALUE );
-				xmlFilterableReportedPeptideAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
-				xmlFilterableReportedPeptideAnnotation.setValue( BigDecimal.valueOf( peptideStats.getpValue()) );
-			}
-			// handle pep
-			{
-				FilterableReportedPeptideAnnotation xmlFilterableReportedPeptideAnnotation = new FilterableReportedPeptideAnnotation();
-				xmlFilterableReportedPeptideAnnotations.getFilterableReportedPeptideAnnotation().add( xmlFilterableReportedPeptideAnnotation );
-				
-				xmlFilterableReportedPeptideAnnotation.setAnnotationName( PeptideAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_PEP );
-				xmlFilterableReportedPeptideAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
-				xmlFilterableReportedPeptideAnnotation.setValue( BigDecimal.valueOf( peptideStats.getPep()) );
-			}
-			// handle svm score
-			{
-				FilterableReportedPeptideAnnotation xmlFilterableReportedPeptideAnnotation = new FilterableReportedPeptideAnnotation();
-				xmlFilterableReportedPeptideAnnotations.getFilterableReportedPeptideAnnotation().add( xmlFilterableReportedPeptideAnnotation );
-				
-				xmlFilterableReportedPeptideAnnotation.setAnnotationName( PeptideAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_SVMSCORE );
-				xmlFilterableReportedPeptideAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
-				xmlFilterableReportedPeptideAnnotation.setValue( BigDecimal.valueOf( peptideStats.getSvmScore()) );
+			if(!conversionParameters.getOpenModsSeparate()) {
+
+				// add in the filterable peptide annotations (e.g., q-value)
+				ReportedPeptideAnnotations xmlReportedPeptideAnnotations = new ReportedPeptideAnnotations();
+				xmlReportedPeptide.setReportedPeptideAnnotations(xmlReportedPeptideAnnotations);
+
+				FilterableReportedPeptideAnnotations xmlFilterableReportedPeptideAnnotations = new FilterableReportedPeptideAnnotations();
+				xmlReportedPeptideAnnotations.setFilterableReportedPeptideAnnotations(xmlFilterableReportedPeptideAnnotations);
+
+				// handle q-value
+				{
+					FilterableReportedPeptideAnnotation xmlFilterableReportedPeptideAnnotation = new FilterableReportedPeptideAnnotation();
+					xmlFilterableReportedPeptideAnnotations.getFilterableReportedPeptideAnnotation().add(xmlFilterableReportedPeptideAnnotation);
+
+					xmlFilterableReportedPeptideAnnotation.setAnnotationName(PeptideAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_QVALUE);
+					xmlFilterableReportedPeptideAnnotation.setSearchProgram(Constants.PROGRAM_NAME_PERCOLATOR);
+					xmlFilterableReportedPeptideAnnotation.setValue(BigDecimal.valueOf(peptideStats.getqValue()));
+				}
+				// handle p-value
+				{
+					FilterableReportedPeptideAnnotation xmlFilterableReportedPeptideAnnotation = new FilterableReportedPeptideAnnotation();
+					xmlFilterableReportedPeptideAnnotations.getFilterableReportedPeptideAnnotation().add(xmlFilterableReportedPeptideAnnotation);
+
+					xmlFilterableReportedPeptideAnnotation.setAnnotationName(PeptideAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_PVALUE);
+					xmlFilterableReportedPeptideAnnotation.setSearchProgram(Constants.PROGRAM_NAME_PERCOLATOR);
+					xmlFilterableReportedPeptideAnnotation.setValue(BigDecimal.valueOf(peptideStats.getpValue()));
+				}
+				// handle pep
+				{
+					FilterableReportedPeptideAnnotation xmlFilterableReportedPeptideAnnotation = new FilterableReportedPeptideAnnotation();
+					xmlFilterableReportedPeptideAnnotations.getFilterableReportedPeptideAnnotation().add(xmlFilterableReportedPeptideAnnotation);
+
+					xmlFilterableReportedPeptideAnnotation.setAnnotationName(PeptideAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_PEP);
+					xmlFilterableReportedPeptideAnnotation.setSearchProgram(Constants.PROGRAM_NAME_PERCOLATOR);
+					xmlFilterableReportedPeptideAnnotation.setValue(BigDecimal.valueOf(peptideStats.getPep()));
+				}
+				// handle svm score
+				{
+					FilterableReportedPeptideAnnotation xmlFilterableReportedPeptideAnnotation = new FilterableReportedPeptideAnnotation();
+					xmlFilterableReportedPeptideAnnotations.getFilterableReportedPeptideAnnotation().add(xmlFilterableReportedPeptideAnnotation);
+
+					xmlFilterableReportedPeptideAnnotation.setAnnotationName(PeptideAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_SVMSCORE);
+					xmlFilterableReportedPeptideAnnotation.setSearchProgram(Constants.PROGRAM_NAME_PERCOLATOR);
+					xmlFilterableReportedPeptideAnnotation.setValue(BigDecimal.valueOf(peptideStats.getSvmScore()));
+				}
 			}
 			
 
@@ -380,7 +387,7 @@ public class XMLBuilder {
 						
 						
 						// add in open mod
-						if(magnumPSM.getOpenModification() != null) {
+						if(percolatorPSM.isOpenModResult() && magnumPSM.getOpenModification() != null) {
 							PsmOpenModification xmlPsmOpenModifcation = new PsmOpenModification();
 							xmlPsm.setPsmOpenModification( xmlPsmOpenModifcation );
 							xmlPsmOpenModifcation.setMass(magnumPSM.getOpenModification().getMass());
