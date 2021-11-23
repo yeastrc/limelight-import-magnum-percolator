@@ -387,7 +387,8 @@ public class XMLBuilder {
 						
 						
 						// add in open mod
-						if(percolatorPSM.isOpenModResult() && magnumPSM.getOpenModification() != null) {
+						if( (!(conversionParameters.getOpenModsSeparate()) || percolatorPSM.isOpenModResult()) && magnumPSM.getOpenModification() != null ) {
+
 							PsmOpenModification xmlPsmOpenModifcation = new PsmOpenModification();
 							xmlPsm.setPsmOpenModification( xmlPsmOpenModifcation );
 							xmlPsmOpenModifcation.setMass(magnumPSM.getOpenModification().getMass());
