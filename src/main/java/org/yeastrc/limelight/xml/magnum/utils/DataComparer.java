@@ -18,8 +18,7 @@
 
 package org.yeastrc.limelight.xml.magnum.utils;
 
-import org.yeastrc.limelight.xml.magnum.objects.MagnumResults;
-import org.yeastrc.limelight.xml.magnum.objects.PercolatorResults;
+import org.yeastrc.limelight.xml.magnum.objects.*;
 
 public class DataComparer {
 
@@ -34,28 +33,34 @@ public class DataComparer {
 	 */
 	public static void compareData( MagnumResults magnumResults, PercolatorResults percolatorResults ) throws Exception {
 		
-		for( String reportedPeptideString : percolatorResults.getPeptideResults().keySet() ) {
+		for( ReportedPeptide reportedPeptide : percolatorResults.getPeptideResults().keySet() ) {
 			
-			if( !magnumResults.getMagnumResultMap().containsKey( reportedPeptideString ) ) {
-				
-				throw new Exception( "Could not find reported peptide (" + reportedPeptideString + ") in magnum results." );
+			if( !magnumResults.getMagnumResultMap().containsKey( reportedPeptide ) ) {
+				throw new Exception( "Could not find reported peptide (" + reportedPeptide.getReportedPeptideString() + ") in magnum results." );
 			}
 			
 			/*
 			 * check that all scan numbers reported for this reported peptide by percolator were
 			 * also reported for this reported peptide by magnum
 			 */
-			for( int scanNumber : percolatorResults.getPeptideResults().get( reportedPeptideString ).getPsmsIndexedByScanNumber().keySet() ) {
-				
-				if( !magnumResults.getMagnumResultMap().get( reportedPeptideString ).containsKey( scanNumber ) )
-					throw new Exception( "Could not find reported peptide (" + reportedPeptideString + ") for scan number (" + scanNumber + ") in magnum results." );
+			for(SubSearchName subSearchName : percolatorResults.getPeptideResults().get(reportedPeptide).getPsmMap().keySet()) {
 
-				if( magnumResults.getMagnumResultMap().get( reportedPeptideString ).get( scanNumber ).size() < 1 )
-					throw new Exception( "Could not find reported peptide (" + reportedPeptideString + ") for scan number (" + scanNumber + ") in magnum results." );
+				if (!magnumResults.getMagnumResultMap().get(reportedPeptide).containsKey(subSearchName))
+					throw new Exception("Could not find sub search (" + subSearchName.getSubSearchName() + ") in magnum results.");
 
+				for (ScanNumber scanNumber : percolatorResults.getPeptideResults().get(reportedPeptide).getPsmMap().get(subSearchName).keySet()) {
+
+					if (!magnumResults.getMagnumResultMap().get(reportedPeptide).get(subSearchName).containsKey(scanNumber))
+						throw new Exception("Could not find reported peptide (" + reportedPeptide.getReportedPeptideString() + ")" +
+								" for scan number (" + scanNumber.getScanNumber() + ")" +
+								" for sub search (" + subSearchName.getSubSearchName() + ") in magnum results.");
+
+					if (magnumResults.getMagnumResultMap().get(reportedPeptide).get(subSearchName).get(scanNumber).size() < 1)
+						throw new Exception("Could not find reported peptide (" + reportedPeptide.getReportedPeptideString() + ")" +
+								" for scan number (" + scanNumber.getScanNumber() + ")" +
+								" for sub search (" + subSearchName.getSubSearchName() + ") in magnum results.");
+				}
 			}
 		}		
 	}
-	
-	
 }

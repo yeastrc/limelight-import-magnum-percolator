@@ -7,10 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.yeastrc.limelight.xml.magnum.objects.MagnumPSM;
-import org.yeastrc.limelight.xml.magnum.objects.MagnumResults;
-import org.yeastrc.limelight.xml.magnum.objects.PercolatorPeptideResult;
-import org.yeastrc.limelight.xml.magnum.objects.PercolatorResults;
+import org.yeastrc.limelight.xml.magnum.objects.*;
 
 public class MagnumParsingUtils {
 
@@ -28,28 +25,39 @@ public class MagnumParsingUtils {
 	 */
 	public static void mapMagnumPSMsToPercolatorReportedPeptides( MagnumResults magnumResults, PercolatorResults percolatorResults ) throws Exception {
 
-		Map<String,Map<Integer,Collection<MagnumPSM>>> returnMap = new HashMap<>();
+		Map<ReportedPeptide, Map<SubSearchName, Map<ScanNumber,Collection<MagnumPSM>>>> returnMap = new HashMap<>();
 		
-		for( String tempPeptide : magnumResults.getMagnumResultMap().keySet() ) {
+		for( ReportedPeptide oldReportedPeptide : magnumResults.getMagnumResultMap().keySet() ) {
 
-			for( int scanNumber : magnumResults.getMagnumResultMap().get( tempPeptide ).keySet() ) {
-			
-				Collection<MagnumPSM> magnumPSMs = magnumResults.getMagnumResultMap().get( tempPeptide ).get( scanNumber );
-				
-				for( MagnumPSM magnumPSM : magnumPSMs ) {
-					
-					String reportedPeptideStringToUse = MagnumParsingUtils.getPercolatorReportedPeptideStringForMagnumPSM( percolatorResults, magnumPSM );
-					
-					if( reportedPeptideStringToUse != null ) {
-						if( !returnMap.containsKey( reportedPeptideStringToUse ) ) {
-							returnMap.put( reportedPeptideStringToUse, new HashMap<>() );
+			for(SubSearchName subSearchName : magnumResults.getMagnumResultMap().get(oldReportedPeptide).keySet()) {
+
+				for( ScanNumber scanNumber : magnumResults.getMagnumResultMap().get(oldReportedPeptide).get(subSearchName).keySet() ) {
+
+					Collection<MagnumPSM> magnumPSMs = magnumResults.getMagnumResultMap().get(oldReportedPeptide).get(subSearchName).get(scanNumber);
+
+					for (MagnumPSM magnumPSM : magnumPSMs) {
+
+						String reportedPeptideStringToUse = MagnumParsingUtils.getPercolatorReportedPeptideStringForMagnumPSM(percolatorResults, magnumPSM);
+						//this will be null for decoys
+
+						if (reportedPeptideStringToUse != null) {
+
+							ReportedPeptide newReportedPeptide = new ReportedPeptide(reportedPeptideStringToUse);
+
+							if (!returnMap.containsKey(newReportedPeptide)) {
+								returnMap.put(newReportedPeptide, new HashMap<>());
+							}
+
+							if(!returnMap.get(newReportedPeptide).containsKey(subSearchName)) {
+								returnMap.get(newReportedPeptide).put(subSearchName, new HashMap<>());
+							}
+
+							if(!returnMap.get(newReportedPeptide).get(subSearchName).containsKey(scanNumber)) {
+								returnMap.get(newReportedPeptide).get(subSearchName).put(scanNumber, new HashSet<>());
+							}
+
+							returnMap.get(newReportedPeptide).get(subSearchName).get(scanNumber).add(magnumPSM);
 						}
-						
-						if( !returnMap.get( reportedPeptideStringToUse ).containsKey( scanNumber ) ) {
-							returnMap.get( reportedPeptideStringToUse ).put( scanNumber, new HashSet<>() );
-						}
-						
-						returnMap.get( reportedPeptideStringToUse ).get( scanNumber ).add( magnumPSM );
 					}
 				}
 			}
@@ -74,16 +82,17 @@ public class MagnumParsingUtils {
 		MagnumParsingUtils.buildReportedPeptideStringsWithRoundingErrors( "", magnumPSM.getPeptideSequence(), magnumPSM.getModifications(), 1, reportedPeptideStringCandidates );
 		
 		for( String candidateReportedPeptide : reportedPeptideStringCandidates ) {
-			
-			PercolatorPeptideResult candidatePeptideResult = percolatorResults.getPeptideResults().get( candidateReportedPeptide );
-			
-			if( candidatePeptideResult != null &&
-				percolatorResults.getPeptideResults().get( candidateReportedPeptide ).getPsmsIndexedByScanNumber().containsKey( magnumPSM.getScanNumber() ) ) {
-					
-					return candidateReportedPeptide;
+
+			ReportedPeptide candidateReportedPeptideObject = new ReportedPeptide(candidateReportedPeptide);
+			ScanNumber scanNumberObject = new ScanNumber(magnumPSM.getScanNumber());
+			SubSearchName subSearchNameObject = new SubSearchName(magnumPSM.getSubSearchName());
+
+			if(percolatorResults.getPeptideResults().containsKey(candidateReportedPeptideObject)
+					&& percolatorResults.getPeptideResults().get(candidateReportedPeptideObject).getPsmMap().containsKey(subSearchNameObject)
+					&& percolatorResults.getPeptideResults().get(candidateReportedPeptideObject).getPsmMap().get(subSearchNameObject).containsKey(scanNumberObject)) {
+				return candidateReportedPeptide;
 			}
-			
-			
+
 		}
 		
 		return null;

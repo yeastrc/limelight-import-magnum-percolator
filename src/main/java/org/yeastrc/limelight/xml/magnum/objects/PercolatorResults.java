@@ -34,23 +34,18 @@ public class PercolatorResults {
 	public void setPercolatorVersion(String percolatorVersion) {
 		this.percolatorVersion = percolatorVersion;
 	}
-	/**
-	 * @return the reportedPeptidePSMMap
-	 */
-	public Map<String, PercolatorPeptideResult> getPeptideResults() {
+
+	public Map<ReportedPeptide, PercolatorPeptideResult> getPeptideResults() {
 		return peptideResults;
 	}
-	/**
-	 * @param reportedPeptidePSMMap the reportedPeptidePSMMap to set
-	 */
-	public void setPeptideResults(Map<String, PercolatorPeptideResult> reportedPeptidePSMMap) {
-		this.peptideResults = reportedPeptidePSMMap;
-	}
 
+	public void setPeptideResults(Map<ReportedPeptide, PercolatorPeptideResult> peptideResults) {
+		this.peptideResults = peptideResults;
+	}
 
 	private String percolatorVersion;
 	
 	// map of reported peptide strings to a peptide result object containing stats and psms
-	private Map<String, PercolatorPeptideResult> peptideResults;	
+	private Map<ReportedPeptide, PercolatorPeptideResult> peptideResults;
 	
 }

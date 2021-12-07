@@ -62,14 +62,14 @@ public class ConversionParameters {
 	/**
 	 * @return the magnumParametersFile
 	 */
-	public File getMagnumParametersFile() {
-		return magnumParametersFile;
+	public File[] getMagnumParametersFiles() {
+		return magnumParametersFiles;
 	}
 	/**
-	 * @param magnumParametersFile the magnumParametersFile to set
+	 * @param magnumParametersFiles the magnumParametersFile to set
 	 */
-	public void setMagnumParametersFile(File magnumParametersFile) {
-		this.magnumParametersFile = magnumParametersFile;
+	public void setMagnumParametersFiles(File[] magnumParametersFiles) {
+		this.magnumParametersFiles = magnumParametersFiles;
 	}
 	/**
 	 * @return the percolatorXMLOutputFile
@@ -86,14 +86,14 @@ public class ConversionParameters {
 	/**
 	 * @return the magnumOutputFile
 	 */
-	public File getMagnumOutputFile() {
-		return magnumOutputFile;
+	public File[] getMagnumOutputFiles() {
+		return magnumOutputFiles;
 	}
 	/**
-	 * @param magnumOutputFile the magnumOutputFile to set
+	 * @param magnumOutputFiles the magnumOutputFile to set
 	 */
-	public void setMagnumOutputFile(File magnumOutputFile) {
-		this.magnumOutputFile = magnumOutputFile;
+	public void setMagnumOutputFiles(File[] magnumOutputFiles) {
+		this.magnumOutputFiles = magnumOutputFiles;
 	}
 	
 	/**
@@ -130,11 +130,11 @@ public class ConversionParameters {
 	}
 
 	private File fastaFile;
-	private File magnumParametersFile;
+	private File[] magnumParametersFiles;
 	private File percolatorXMLOutputFile;
 	private File openModsPercolatorXMLOutputFile;
 	private File standardPercolatorXMLOutputFile;
-	private File magnumOutputFile;
+	private File[] magnumOutputFiles;
 	private File limelightXMLOutputFile;
 	private ConversionProgramInfo conversionProgramInfo;
 	private BigDecimal qValueOverride;

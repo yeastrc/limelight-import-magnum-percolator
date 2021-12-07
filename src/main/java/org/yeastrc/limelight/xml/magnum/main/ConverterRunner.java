@@ -39,12 +39,11 @@ public class ConverterRunner {
 	public void convertMagnumToLimelightXML( ConversionParameters conversionParameters ) throws Throwable {
 	
 		System.err.print( "Reading Magnum params into memory..." );
-		MagnumParameters magParams = MagnumParamsReader.getMagnumParameters( conversionParameters.getMagnumParametersFile() );
+		MagnumParameters magParams = MagnumParamsReader.getMagnumParameters( conversionParameters.getMagnumParametersFiles()[0] );
 		System.err.println( " Done." );
 		
-		
 		System.err.print( "Reading Magnum data into memory..." );
-		MagnumResults magnumResults = MagnumPEPXMLResultsReader.getMagnumResults( conversionParameters.getMagnumOutputFile(), magParams );
+		MagnumResults magnumResults = MagnumPEPXMLResultsReader.getMagnumResults( conversionParameters.getMagnumOutputFiles(), magParams );
 		System.err.println( " Done." );
 
 		PercolatorResults percolatorResults = null;
@@ -79,8 +78,6 @@ public class ConverterRunner {
 		System.err.print( "Writing out XML..." );
 		(new XMLBuilder()).buildAndSaveXML( conversionParameters, magnumResults, magParams, percolatorResults);
 		System.err.println( " Done." );
-		
-		
 	}
 	
 	

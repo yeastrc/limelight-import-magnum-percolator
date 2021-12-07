@@ -144,6 +144,15 @@ public class PercolatorPSM {
 	public void setScanNumber(int scanNumber) {
 		this.scanNumber = scanNumber;
 	}
+
+	public String getSubSearchName() {
+		return subSearchName;
+	}
+
+	public void setSubSearchName(String subSearchName) {
+		this.subSearchName = subSearchName;
+	}
+
 	private double svmScore;
 	private double qValue;
 	private double pValue;
@@ -152,4 +161,5 @@ public class PercolatorPSM {
 	private String psmId;
 	private int scanNumber;
 	private boolean isOpenModResult = false;
+	private String subSearchName;
 }

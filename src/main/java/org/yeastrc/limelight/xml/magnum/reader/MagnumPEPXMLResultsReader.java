@@ -8,15 +8,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 
 import org.yeastrc.limelight.xml.magnum.constants.MagnumConstants;
-import org.yeastrc.limelight.xml.magnum.objects.MagnumPSM;
-import org.yeastrc.limelight.xml.magnum.objects.MagnumParameters;
-import org.yeastrc.limelight.xml.magnum.objects.MagnumResults;
-import org.yeastrc.limelight.xml.magnum.objects.OpenModification;
+import org.yeastrc.limelight.xml.magnum.objects.*;
 import org.yeastrc.limelight.xml.magnum.utils.ModParsingUtils;
 
 import net.systemsbiology.regis_web.pepxml.ModInfoDataType;
@@ -33,65 +32,89 @@ public class MagnumPEPXMLResultsReader {
 
 	/**
 	 * Get the parsed magnum results for the given magnum txt data file
-	 * @param pepXMLFile
+	 * @param pepXMLFiles
 	 * @param params
 	 * @return
 	 * @throws Throwable
 	 */
-	public static MagnumResults getMagnumResults( File pepXMLFile, MagnumParameters params ) throws Throwable {
+	public static MagnumResults getMagnumResults( File[] pepXMLFiles, MagnumParameters params ) throws Throwable {
 
-		Map<String,Map<Integer,Collection<MagnumPSM>>> resultMap = new HashMap<>();
-				
-		MsmsPipelineAnalysis msAnalysis = null;
-		try {
-			msAnalysis = getMSmsPipelineAnalysis( pepXMLFile );
-		} catch( Throwable t ) {
-			System.err.println( "Got an error parsing the pep XML file. Error: " + t.getMessage() );
-			throw t;
-		}
-		
-		
+		Map<ReportedPeptide, Map<SubSearchName, Map<ScanNumber,Collection<MagnumPSM>>>> resultMap = new HashMap<>();
+
 		MagnumResults results = new MagnumResults();
 		results.setMagnumResultMap( resultMap );
-		results.setMagnumVersion( getMagnumVersionFromXML( msAnalysis ) );
-		
-		for( MsmsRunSummary runSummary : msAnalysis.getMsmsRunSummary() ) {
-			for( SpectrumQuery spectrumQuery : runSummary.getSpectrumQuery() ) {
-				
-				int charge = getChargeFromSpectrumQuery( spectrumQuery );
-				int scanNumber = getScanNumberFromSpectrumQuery( spectrumQuery );
-				double obsMass = getObservedMassFromSpectrumQuery( spectrumQuery );
-				double retentionTime = getRetentionTimeFromSpectrumQuery( spectrumQuery );
-				
-				for( SearchResult searchResult : spectrumQuery.getSearchResult() ) {
-					for( SearchHit searchHit : searchResult.getSearchHit() ) {
 
-						MagnumPSM psm = null;
-						
-						try {
-							psm = getPsmFromSearchHit( searchHit, charge, scanNumber, obsMass, retentionTime );
-							
-						} catch( Throwable t) {
-							
-							System.err.println( "Error reading PSM from pepXML. Error: " + t.getMessage() );
-							throw t;
-							
+		for(File pepXMLFile : pepXMLFiles) {
+
+			MsmsPipelineAnalysis msAnalysis = null;
+			try {
+				msAnalysis = getMSmsPipelineAnalysis(pepXMLFile);
+			} catch (Throwable t) {
+				System.err.println("Got an error parsing the pep XML file. Error: " + t.getMessage());
+				throw t;
+			}
+
+			// set the magnum version if it isn't set
+			if(results.getMagnumVersion() == null) {
+				results.setMagnumVersion(getMagnumVersionFromXML(msAnalysis));
+			}
+
+			for (MsmsRunSummary runSummary : msAnalysis.getMsmsRunSummary()) {
+				for (SpectrumQuery spectrumQuery : runSummary.getSpectrumQuery()) {
+
+					int charge = getChargeFromSpectrumQuery(spectrumQuery);
+					int scanNumber = getScanNumberFromSpectrumQuery(spectrumQuery);
+					double obsMass = getObservedMassFromSpectrumQuery(spectrumQuery);
+					double retentionTime = getRetentionTimeFromSpectrumQuery(spectrumQuery);
+					String scanFilename = getScanFilenameFromSpectrumQuery(spectrumQuery);
+
+
+					for (SearchResult searchResult : spectrumQuery.getSearchResult()) {
+						for (SearchHit searchHit : searchResult.getSearchHit()) {
+
+							MagnumPSM psm = null;
+
+							try {
+								psm = getPsmFromSearchHit(searchHit, charge, scanNumber, obsMass, retentionTime);
+
+								if(pepXMLFiles.length > 1) {
+									psm.setScanFilename(scanFilename);
+									psm.setSubSearchName(scanFilename);
+								} else {
+									psm.setSubSearchName("default");
+								}
+
+							} catch (Throwable t) {
+
+								System.err.println("Error reading PSM from pepXML. Error: " + t.getMessage());
+								throw t;
+
+							}
+
+							String psmReportedPeptide = ModParsingUtils.getRoundedReportedPeptideString(psm.getPeptideSequence(), psm.getModifications());
+
+							ReportedPeptide reportedPeptide = new ReportedPeptide(psmReportedPeptide);
+							SubSearchName subSearchName = new SubSearchName(psm.getSubSearchName());
+							ScanNumber scanNumberObject = new ScanNumber(psm.getScanNumber());
+
+							if(!resultMap.containsKey(reportedPeptide))
+								resultMap.put(reportedPeptide, new HashMap<>());
+
+							if(!resultMap.get(reportedPeptide).containsKey(subSearchName)) {
+								resultMap.get(reportedPeptide).put(subSearchName, new HashMap<>());
+							}
+
+							if(!resultMap.get(reportedPeptide).get(subSearchName).containsKey(scanNumberObject)) {
+								resultMap.get(reportedPeptide).get(subSearchName).put(scanNumberObject, new HashSet<>());
+							}
+
+							resultMap.get(reportedPeptide).get(subSearchName).get(scanNumberObject).add(psm);
 						}
-
-						String psmReportedPeptide = ModParsingUtils.getRoundedReportedPeptideString( psm.getPeptideSequence(), psm.getModifications() );
-
-						if( !results.getMagnumResultMap().containsKey( psmReportedPeptide ) )
-							results.getMagnumResultMap().put( psmReportedPeptide, new HashMap<>() );
-						
-						if( !results.getMagnumResultMap().get( psmReportedPeptide ).containsKey( scanNumber ) )
-							results.getMagnumResultMap().get( psmReportedPeptide ).put( scanNumber, new HashSet<>() );
-						
-						results.getMagnumResultMap().get( psmReportedPeptide ).get( scanNumber ).add( psm );						
 					}
 				}
 			}
 		}
-		
+
 		return results;
 	}
 	
@@ -278,6 +301,26 @@ public class MagnumPEPXMLResultsReader {
 		MsmsPipelineAnalysis msAnalysis = (MsmsPipelineAnalysis)jaxbUnmarshaller.unmarshal( file );
 		
 		return msAnalysis;
+	}
+
+	/**
+	 * Get the scan filename from the spectrum query JAXB object.
+	 *
+	 * Parsed out of this string: Loo_2021_1108_RJ_48_0f1.00065.00065.3
+	 * Where the correct answer is: Loo_2021_1108_RJ_48_0f1
+	 * @param spectrumQuery
+	 * @return
+	 * @throws Exception if it cannot do this
+	 */
+	private static String getScanFilenameFromSpectrumQuery( SpectrumQuery spectrumQuery ) throws Exception {
+		Pattern p = Pattern.compile("^(.+)\\.\\d+\\.\\d+\\.\\d+$");
+		Matcher m = p.matcher(spectrumQuery.getSpectrum());
+
+		if(m.matches()) {
+			return m.group(1);
+		}
+
+		throw new Exception("Could not find name of spectral file in: " + spectrumQuery.getSpectrum());
 	}
 	
 }

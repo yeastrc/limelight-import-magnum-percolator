@@ -1,12 +1,15 @@
 package org.yeastrc.limelight.xml.magnum.builder;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 import org.yeastrc.limelight.limelight_import.api.xml_dto.*;
+import org.yeastrc.limelight.limelight_import.api.xml_dto.ReportedPeptide;
 import org.yeastrc.limelight.limelight_import.api.xml_dto.ReportedPeptide.ReportedPeptideAnnotations;
 import org.yeastrc.limelight.limelight_import.api.xml_dto.SearchProgram.PsmAnnotationTypes;
 import org.yeastrc.limelight.limelight_import.api.xml_dto.SearchProgram.ReportedPeptideAnnotationTypes;
@@ -18,15 +21,7 @@ import org.yeastrc.limelight.xml.magnum.annotation.PeptideAnnotationTypeSortOrde
 import org.yeastrc.limelight.xml.magnum.annotation.PeptideAnnotationTypes;
 import org.yeastrc.limelight.xml.magnum.annotation.PeptideDefaultVisibleAnnotationTypes;
 import org.yeastrc.limelight.xml.magnum.constants.Constants;
-import org.yeastrc.limelight.xml.magnum.objects.ConversionParameters;
-import org.yeastrc.limelight.xml.magnum.objects.MagnumPSM;
-import org.yeastrc.limelight.xml.magnum.objects.MagnumParameters;
-import org.yeastrc.limelight.xml.magnum.objects.MagnumResults;
-import org.yeastrc.limelight.xml.magnum.objects.ParsedPeptide;
-import org.yeastrc.limelight.xml.magnum.objects.PercolatorPSM;
-import org.yeastrc.limelight.xml.magnum.objects.PercolatorPeptideResult;
-import org.yeastrc.limelight.xml.magnum.objects.PercolatorPeptideStats;
-import org.yeastrc.limelight.xml.magnum.objects.PercolatorResults;
+import org.yeastrc.limelight.xml.magnum.objects.*;
 import org.yeastrc.limelight.xml.magnum.utils.MassUtils;
 import org.yeastrc.limelight.xml.magnum.utils.ReportedPeptideParsingUtils;
 
@@ -182,18 +177,18 @@ public class XMLBuilder {
 		limelightInputRoot.setReportedPeptides( reportedPeptides );
 		
 		// iterate over each distinct reported peptide
-		for( String percolatorReportedPeptide : percolatorResults.getPeptideResults().keySet() ) {
-			
-			PercolatorPeptideResult peptideResult = percolatorResults.getPeptideResults().get( percolatorReportedPeptide );
+		for( org.yeastrc.limelight.xml.magnum.objects.ReportedPeptide percolatorReportedPeptideObject : percolatorResults.getPeptideResults().keySet() ) {
+
+			PercolatorPeptideResult peptideResult = percolatorResults.getPeptideResults().get( percolatorReportedPeptideObject );
 			
 			PercolatorPeptideStats peptideStats = peptideResult.getPercolatorPeptideStats();
 			
-			ParsedPeptide parsedPeptide = ReportedPeptideParsingUtils.parsePeptide( percolatorReportedPeptide );
+			ParsedPeptide parsedPeptide = ReportedPeptideParsingUtils.parsePeptide( percolatorReportedPeptideObject.getReportedPeptideString() );
 			
 			ReportedPeptide xmlReportedPeptide = new ReportedPeptide();
 			reportedPeptides.getReportedPeptide().add( xmlReportedPeptide );
 			
-			xmlReportedPeptide.setReportedPeptideString( percolatorReportedPeptide );
+			xmlReportedPeptide.setReportedPeptideString( percolatorReportedPeptideObject.getReportedPeptideString() );
 			xmlReportedPeptide.setSequence( parsedPeptide.getNakedSequence() );
 
 			if(!conversionParameters.getOpenModsSeparate()) {
@@ -265,157 +260,167 @@ public class XMLBuilder {
 			xmlReportedPeptide.setPsms( xmlPsms );
 			
 			// iterate over all PSMs for this reported peptide
-			for( int scanNumber : peptideResult.getPsmsIndexedByScanNumber().keySet() ) {
-				
-				Collection<MagnumPSM> magnumPSMs = magnumResults.getMagnumResultMap().get( percolatorReportedPeptide ).get( scanNumber );
+			for(SubSearchName subSearchName : peptideResult.getPsmMap().keySet()) {
+				for( ScanNumber scanNumberObject : peptideResult.getPsmMap().get(subSearchName).keySet() ) {
 
-				/*
-				 * PSMs listed by percolator cannot be reliably matched to specific PSMs listed by Magnum.
-				 * 
-				 * This is because Magnum may list multiple PSMs for the same scan that have very slightly different mod
-				 * masses (one from open mod, one from variable mod) on the same peptide position. When converted to ints
-				 * for obtaining peptide-level scoring in percolator, both PSMs are listed as PSMs for that aggregate peptide,
-				 * and they are listed by scan number.
-				 * 
-				 * Since scan number is ambiguous (multiple PSMs for same scan number), these cannot be mapped reliably on
-				 * a specific PSM in the magnum data. So, in an effort to not toss data out, we are allowing more than one
-				 * percolator PSM for a given scan number for a given peptide match--and we are allowing more than one
-				 * magnum PSM for a given scan number for the same peptide match. Since we can't tell exactly which goes with
-				 * which, we will have a PSM entry for all combinations of percolator and magnum PSMs for this peptide and scan
-				 * number.
-				 * 
-				 * So, if there are two magnum PSMs for this scan number for this percolator reported peptide, this will
-				 * result in 4 PSMs in the limelight XML file (2 percolator PSMs * 2 magnum PSMs). Ideally Magnum would
-				 * not list multiple PSMs for the same scan number for the same peptide match--and if that is changed
-				 * in the future, this code will not need changing.
-				 * 
-				 */
-				
-				
-				for( PercolatorPSM percolatorPSM : peptideResult.getPsmsIndexedByScanNumber().get( scanNumber ) ) {
-					
-					for( MagnumPSM magnumPSM : magnumPSMs ) {
-					
-						Psm xmlPsm = new Psm();
-						xmlPsms.getPsm().add( xmlPsm );
-						
-						xmlPsm.setScanNumber( new BigInteger( String.valueOf( scanNumber ) ) );
-						xmlPsm.setPrecursorCharge( new BigInteger( String.valueOf( magnumPSM.getCharge() ) ) );
-						xmlPsm.setPrecursorMZ(MassUtils.getObservedMoverZForPsm(magnumPSM));
-						xmlPsm.setPrecursorRetentionTime(BigDecimal.valueOf(magnumPSM.getRetentionTime()));
+					int scanNumber = scanNumberObject.getScanNumber();
 
-						// add in the filterable PSM annotations (e.g., score)
-						FilterablePsmAnnotations xmlFilterablePsmAnnotations = new FilterablePsmAnnotations();
-						xmlPsm.setFilterablePsmAnnotations( xmlFilterablePsmAnnotations );
-						
-						// handle magnum scores
-						{
-							FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
-							xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
-							
-							xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_EVALUE );
-							xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_MAGNUM );
-							xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( magnumPSM.geteValue()) );
-						}
-						{
-							FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
-							xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
-							
-							xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_MSCORE );
-							xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_MAGNUM );
-							xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( magnumPSM.getmScore()) );
-						}
-						{
-							FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
-							xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
-							
-							xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_DSCORE );
-							xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_MAGNUM );
-							xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( magnumPSM.getdScore() ) );
-						}
-						{
-							FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
-							xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
-							
-							xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_PPMERROR );
-							xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_MAGNUM );
-							xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( magnumPSM.getPpmError()) );
-						}
-						{
-							FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
-							xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
+					Collection<MagnumPSM> magnumPSMs = magnumResults.getMagnumResultMap().get(percolatorReportedPeptideObject).get(subSearchName).get(scanNumberObject);
 
-							xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_MASSDIFF );
-							xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_MAGNUM );
-							xmlFilterablePsmAnnotation.setValue( magnumPSM.getMassDiff() );
-						}
-						
-						
-						// handle percolator scores
-						{
-							FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
-							xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
-							
-							xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_PEP );
-							xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
-							xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( percolatorPSM.getPep() ) );
-						}
-						{
-							FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
-							xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
-							
-							xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_PVALUE );
-							xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
-							xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( percolatorPSM.getpValue() ) );
-						}
-						{
-							FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
-							xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
-							
-							xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_QVALUE );
-							xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
-							xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( percolatorPSM.getqValue() ) );
-						}
-						{
-							FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
-							xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add( xmlFilterablePsmAnnotation );
-							
-							xmlFilterablePsmAnnotation.setAnnotationName( PSMAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_SVMSCORE );
-							xmlFilterablePsmAnnotation.setSearchProgram( Constants.PROGRAM_NAME_PERCOLATOR );
-							xmlFilterablePsmAnnotation.setValue( BigDecimal.valueOf( percolatorPSM.getSvmScore() ) );
-						}
-						
-						
-						// add in open mod
-						if( (!(conversionParameters.getOpenModsSeparate()) || percolatorPSM.isOpenModResult()) && magnumPSM.getOpenModification() != null ) {
+					/*
+					 * PSMs listed by percolator cannot be reliably matched to specific PSMs listed by Magnum.
+					 *
+					 * This is because Magnum may list multiple PSMs for the same scan that have very slightly different mod
+					 * masses (one from open mod, one from variable mod) on the same peptide position. When converted to ints
+					 * for obtaining peptide-level scoring in percolator, both PSMs are listed as PSMs for that aggregate peptide,
+					 * and they are listed by scan number.
+					 *
+					 * Since scan number is ambiguous (multiple PSMs for same scan number), these cannot be mapped reliably on
+					 * a specific PSM in the magnum data. So, in an effort to not toss data out, we are allowing more than one
+					 * percolator PSM for a given scan number for a given peptide match--and we are allowing more than one
+					 * magnum PSM for a given scan number for the same peptide match. Since we can't tell exactly which goes with
+					 * which, we will have a PSM entry for all combinations of percolator and magnum PSMs for this peptide and scan
+					 * number.
+					 *
+					 * So, if there are two magnum PSMs for this scan number for this percolator reported peptide, this will
+					 * result in 4 PSMs in the limelight XML file (2 percolator PSMs * 2 magnum PSMs). Ideally Magnum would
+					 * not list multiple PSMs for the same scan number for the same peptide match--and if that is changed
+					 * in the future, this code will not need changing.
+					 *
+					 */
 
-							PsmOpenModification xmlPsmOpenModifcation = new PsmOpenModification();
-							xmlPsm.setPsmOpenModification( xmlPsmOpenModifcation );
-							xmlPsmOpenModifcation.setMass(magnumPSM.getOpenModification().getMass());
 
-							if( magnumPSM.getOpenModification().getPositions() != null) {
-								for (int position : magnumPSM.getOpenModification().getPositions()) {
-									PsmOpenModificationPosition xmlPsmOpenModifcationPosition = new PsmOpenModificationPosition();
-									xmlPsmOpenModifcation.getPsmOpenModificationPosition().add(xmlPsmOpenModifcationPosition);
-									xmlPsmOpenModifcationPosition.setPosition(BigInteger.valueOf(position));
+					for (PercolatorPSM percolatorPSM : peptideResult.getPsmMap().get(subSearchName).get(scanNumberObject)) {
+
+						for (MagnumPSM magnumPSM : magnumPSMs) {
+
+							Psm xmlPsm = new Psm();
+							xmlPsms.getPsm().add(xmlPsm);
+
+							xmlPsm.setScanNumber(new BigInteger(String.valueOf(scanNumber)));
+							xmlPsm.setPrecursorCharge(new BigInteger(String.valueOf(magnumPSM.getCharge())));
+							xmlPsm.setPrecursorMZ(MassUtils.getObservedMoverZForPsm(magnumPSM));
+							xmlPsm.setPrecursorRetentionTime(BigDecimal.valueOf(magnumPSM.getRetentionTime()));
+
+							// we have sub searches
+							if(conversionParameters.getMagnumOutputFiles().length > 1) {
+								xmlPsm.setScanFileName(magnumPSM.getScanFilename());
+								xmlPsm.setSubgroupName(magnumPSM.getSubSearchName());
+							}
+
+							// add in the filterable PSM annotations (e.g., score)
+							FilterablePsmAnnotations xmlFilterablePsmAnnotations = new FilterablePsmAnnotations();
+							xmlPsm.setFilterablePsmAnnotations(xmlFilterablePsmAnnotations);
+
+							// handle magnum scores
+							{
+								FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
+								xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add(xmlFilterablePsmAnnotation);
+
+								xmlFilterablePsmAnnotation.setAnnotationName(PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_EVALUE);
+								xmlFilterablePsmAnnotation.setSearchProgram(Constants.PROGRAM_NAME_MAGNUM);
+								xmlFilterablePsmAnnotation.setValue(BigDecimal.valueOf(magnumPSM.geteValue()));
+							}
+							{
+								FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
+								xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add(xmlFilterablePsmAnnotation);
+
+								xmlFilterablePsmAnnotation.setAnnotationName(PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_MSCORE);
+								xmlFilterablePsmAnnotation.setSearchProgram(Constants.PROGRAM_NAME_MAGNUM);
+								xmlFilterablePsmAnnotation.setValue(BigDecimal.valueOf(magnumPSM.getmScore()));
+							}
+							{
+								FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
+								xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add(xmlFilterablePsmAnnotation);
+
+								xmlFilterablePsmAnnotation.setAnnotationName(PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_DSCORE);
+								xmlFilterablePsmAnnotation.setSearchProgram(Constants.PROGRAM_NAME_MAGNUM);
+								xmlFilterablePsmAnnotation.setValue(BigDecimal.valueOf(magnumPSM.getdScore()));
+							}
+							{
+								FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
+								xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add(xmlFilterablePsmAnnotation);
+
+								xmlFilterablePsmAnnotation.setAnnotationName(PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_PPMERROR);
+								xmlFilterablePsmAnnotation.setSearchProgram(Constants.PROGRAM_NAME_MAGNUM);
+								xmlFilterablePsmAnnotation.setValue(BigDecimal.valueOf(magnumPSM.getPpmError()));
+							}
+							{
+								FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
+								xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add(xmlFilterablePsmAnnotation);
+
+								xmlFilterablePsmAnnotation.setAnnotationName(PSMAnnotationTypes.MAGNUM_ANNOTATION_TYPE_MASSDIFF);
+								xmlFilterablePsmAnnotation.setSearchProgram(Constants.PROGRAM_NAME_MAGNUM);
+								xmlFilterablePsmAnnotation.setValue(magnumPSM.getMassDiff());
+							}
+
+
+							// handle percolator scores
+							{
+								FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
+								xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add(xmlFilterablePsmAnnotation);
+
+								xmlFilterablePsmAnnotation.setAnnotationName(PSMAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_PEP);
+								xmlFilterablePsmAnnotation.setSearchProgram(Constants.PROGRAM_NAME_PERCOLATOR);
+								xmlFilterablePsmAnnotation.setValue(BigDecimal.valueOf(percolatorPSM.getPep()));
+							}
+							{
+								FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
+								xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add(xmlFilterablePsmAnnotation);
+
+								xmlFilterablePsmAnnotation.setAnnotationName(PSMAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_PVALUE);
+								xmlFilterablePsmAnnotation.setSearchProgram(Constants.PROGRAM_NAME_PERCOLATOR);
+								xmlFilterablePsmAnnotation.setValue(BigDecimal.valueOf(percolatorPSM.getpValue()));
+							}
+							{
+								FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
+								xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add(xmlFilterablePsmAnnotation);
+
+								xmlFilterablePsmAnnotation.setAnnotationName(PSMAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_QVALUE);
+								xmlFilterablePsmAnnotation.setSearchProgram(Constants.PROGRAM_NAME_PERCOLATOR);
+								xmlFilterablePsmAnnotation.setValue(BigDecimal.valueOf(percolatorPSM.getqValue()));
+							}
+							{
+								FilterablePsmAnnotation xmlFilterablePsmAnnotation = new FilterablePsmAnnotation();
+								xmlFilterablePsmAnnotations.getFilterablePsmAnnotation().add(xmlFilterablePsmAnnotation);
+
+								xmlFilterablePsmAnnotation.setAnnotationName(PSMAnnotationTypes.PERCOLATOR_ANNOTATION_TYPE_SVMSCORE);
+								xmlFilterablePsmAnnotation.setSearchProgram(Constants.PROGRAM_NAME_PERCOLATOR);
+								xmlFilterablePsmAnnotation.setValue(BigDecimal.valueOf(percolatorPSM.getSvmScore()));
+							}
+
+
+							// add in open mod
+							if ((!(conversionParameters.getOpenModsSeparate()) || percolatorPSM.isOpenModResult()) && magnumPSM.getOpenModification() != null) {
+
+								PsmOpenModification xmlPsmOpenModifcation = new PsmOpenModification();
+								xmlPsm.setPsmOpenModification(xmlPsmOpenModifcation);
+								xmlPsmOpenModifcation.setMass(magnumPSM.getOpenModification().getMass());
+
+								if (magnumPSM.getOpenModification().getPositions() != null) {
+									for (int position : magnumPSM.getOpenModification().getPositions()) {
+										PsmOpenModificationPosition xmlPsmOpenModifcationPosition = new PsmOpenModificationPosition();
+										xmlPsmOpenModifcation.getPsmOpenModificationPosition().add(xmlPsmOpenModifcationPosition);
+										xmlPsmOpenModifcationPosition.setPosition(BigInteger.valueOf(position));
+									}
 								}
 							}
-						}
 
-						// add in any reporter ions for this psm
-						if( magnumPSM.getReporterIons() != null && magnumPSM.getReporterIons().size() > 0 ) {
+							// add in any reporter ions for this psm
+							if (magnumPSM.getReporterIons() != null && magnumPSM.getReporterIons().size() > 0) {
 
-							ReporterIons xReporterIons = new ReporterIons();
-							xmlPsm.setReporterIons( xReporterIons );
+								ReporterIons xReporterIons = new ReporterIons();
+								xmlPsm.setReporterIons(xReporterIons);
 
-							for( BigDecimal ri : magnumPSM.getReporterIons() ) {
-								ReporterIon xReporterIon = new ReporterIon();
-								xReporterIons.getReporterIon().add( xReporterIon );
+								for (BigDecimal ri : magnumPSM.getReporterIons()) {
+									ReporterIon xReporterIon = new ReporterIon();
+									xReporterIons.getReporterIon().add(xReporterIon);
 
-								xReporterIon.setMass( ri );
+									xReporterIon.setMass(ri);
+								}
 							}
-						}
 
+						}
 					}
 				}
 				
@@ -424,13 +429,15 @@ public class XMLBuilder {
 			
 		}// end iterating over distinct reported peptides
 
-		
-		
+
 		// add in the matched proteins section
 		MatchedProteinsBuilder.getInstance().buildMatchedProteins(
 				                                                   limelightInputRoot,
 				                                                   conversionParameters.getFastaFile(),
-				                                                   percolatorResults.getPeptideResults().keySet(),
+				                                                   percolatorResults.getPeptideResults().keySet()
+																		   .stream()
+																		   .map(org.yeastrc.limelight.xml.magnum.objects.ReportedPeptide::getReportedPeptideString)
+																		   .collect(Collectors.toSet()),
 				                                                   magnumParameters.getDecoyPrefix()
 				                                                  );
 		
@@ -438,14 +445,15 @@ public class XMLBuilder {
 		// add in the config file(s)
 		ConfigurationFiles xmlConfigurationFiles = new ConfigurationFiles();
 		limelightInputRoot.setConfigurationFiles( xmlConfigurationFiles );
-		
-		ConfigurationFile xmlConfigurationFile = new ConfigurationFile();
-		xmlConfigurationFiles.getConfigurationFile().add( xmlConfigurationFile );
-		
-		xmlConfigurationFile.setSearchProgram( Constants.PROGRAM_NAME_MAGNUM );
-		xmlConfigurationFile.setFileName( conversionParameters.getMagnumParametersFile().getName() );
-		xmlConfigurationFile.setFileContent( Files.readAllBytes( FileSystems.getDefault().getPath( conversionParameters.getMagnumParametersFile().getAbsolutePath() ) ) );
-		
+
+		for(File confFile : conversionParameters.getMagnumParametersFiles()) {
+			ConfigurationFile xmlConfigurationFile = new ConfigurationFile();
+			xmlConfigurationFiles.getConfigurationFile().add(xmlConfigurationFile);
+
+			xmlConfigurationFile.setSearchProgram(Constants.PROGRAM_NAME_MAGNUM);
+			xmlConfigurationFile.setFileName(confFile.getName());
+			xmlConfigurationFile.setFileContent(Files.readAllBytes(FileSystems.getDefault().getPath(confFile.getAbsolutePath())));
+		}
 		
 		//make the xml file
 		CreateImportFileFromJavaObjectsMain.getInstance().createImportFileFromJavaObjectsMain( conversionParameters.getLimelightXMLOutputFile(), limelightInputRoot);

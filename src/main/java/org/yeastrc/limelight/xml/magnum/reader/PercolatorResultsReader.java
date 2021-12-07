@@ -27,10 +27,8 @@ import java.util.Map;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 
-import org.yeastrc.limelight.xml.magnum.objects.PercolatorPSM;
-import org.yeastrc.limelight.xml.magnum.objects.PercolatorPeptideResult;
-import org.yeastrc.limelight.xml.magnum.objects.PercolatorPeptideStats;
-import org.yeastrc.limelight.xml.magnum.objects.PercolatorResults;
+import org.yeastrc.limelight.limelight_import.api.xml_dto.ReportedPeptides;
+import org.yeastrc.limelight.xml.magnum.objects.*;
 import org.yeastrc.limelight.xml.magnum.utils.PercolatorParsingUtils;
 import org.yeastrc.proteomics.percolator.out.PercolatorOutXMLUtils;
 import org.yeastrc.proteomics.percolator.out.perc_out_common_interfaces.IPeptide;
@@ -49,11 +47,10 @@ public class PercolatorResultsReader {
 	public static PercolatorResults getPercolatorResults( File file, boolean isOpenMods ) throws Throwable {
 				
 		IPercolatorOutput po = getIPercolatorOutput( file );
-		
 		String version = getPercolatorVersion( po );
 		
-		Map<String, PercolatorPSM> psmIdPSMMap = getPercolatorPSMs( po, isOpenMods );
-		Map<String, PercolatorPeptideResult> peptideResults = getPercolatorPeptidePSMMap( po, psmIdPSMMap );
+		Map<PercolatorPsmId, PercolatorPSM> psmIdPSMMap = getPercolatorPSMs( po, isOpenMods );
+		Map<ReportedPeptide, PercolatorPeptideResult> peptideResults = getPercolatorPeptidePSMMap( po, psmIdPSMMap );
 		
 		psmIdPSMMap = null;
 		po = null;
@@ -74,29 +71,29 @@ public class PercolatorResultsReader {
 	 * @return
 	 * @throws Exception 
 	 */
-	protected static Map<String, PercolatorPeptideResult> getPercolatorPeptidePSMMap( IPercolatorOutput po, Map<String, PercolatorPSM> psmIdPSMMap ) throws Exception {
+	protected static Map<ReportedPeptide, PercolatorPeptideResult> getPercolatorPeptidePSMMap( IPercolatorOutput po, Map<PercolatorPsmId, PercolatorPSM> psmIdPSMMap ) throws Exception {
 		
-		Map<String, PercolatorPeptideResult> resultsMap = new HashMap<>();
+		Map<ReportedPeptide, PercolatorPeptideResult> resultsMap = new HashMap<>();
 		
-		// loop through the repoted peptides
+		// loop through the reported peptides
 	    for( IPeptide xpeptide : po.getPeptides().getPeptide() ) {
 
 	    	PercolatorPeptideStats percolatorPeptide = getPercolatorPeptideFromJAXB( xpeptide );
 	    	
-	    	if( resultsMap.containsKey( percolatorPeptide ) )
+	    	if(resultsMap.containsKey( new ReportedPeptide(percolatorPeptide.getReportedPeptide())))
 	    		throw new Exception( "Found two instances of the same reported peptide: " + percolatorPeptide + " and " + resultsMap.get( percolatorPeptide ) );
 	    	
-	    	Map<Integer, Collection<PercolatorPSM>> psmsForPeptide = getPercolatorPSMsForPeptide( xpeptide, psmIdPSMMap );
+	    	Map<SubSearchName, Map<ScanNumber, Collection<PercolatorPSM>>> psmsForPeptide = getPercolatorPSMsForPeptide( xpeptide, psmIdPSMMap );
 	    	
 	    	if( psmsForPeptide == null || psmsForPeptide.keySet().size() < 1 )
 	    		throw new Exception( "Found no PSMs for peptide: " + percolatorPeptide );
 	    	
 	    	PercolatorPeptideResult result = new PercolatorPeptideResult();
 	    	result.setPercolatorPeptideStats( percolatorPeptide );
-	    	result.setPsmsIndexedByScanNumber( psmsForPeptide );
+	    	result.setPsmMap( psmsForPeptide );
 	    	result.setReportedPeptide( percolatorPeptide.getReportedPeptide() );
 	    	
-	    	resultsMap.put( result.getReportedPeptide(), result );
+	    	resultsMap.put( new ReportedPeptide(result.getReportedPeptide()), result );
 	    }
 		
 		
@@ -110,24 +107,34 @@ public class PercolatorResultsReader {
 	 * @return
 	 * @throws Exception
 	 */
-	protected static Map<Integer, Collection<PercolatorPSM>> getPercolatorPSMsForPeptide( IPeptide xpeptide, Map<String, PercolatorPSM> psmIdPSMMap ) throws Exception {
-		
-		Map<Integer, Collection<PercolatorPSM>> psmsForPeptide = new HashMap<>();
+	protected static Map<SubSearchName, Map<ScanNumber, Collection<PercolatorPSM>>> getPercolatorPSMsForPeptide( IPeptide xpeptide, Map<PercolatorPsmId, PercolatorPSM> psmIdPSMMap ) throws Exception {
+
+		Map<SubSearchName, Map<ScanNumber, Collection<PercolatorPSM>>> psmsForPeptide = new HashMap<>();
 		
 		for( String psmId : xpeptide.getPsmIds().getPsmId() ) {
-			
-			if( !psmIdPSMMap.containsKey( psmId ) )
+
+			PercolatorPsmId percolatorPSMId = new PercolatorPsmId(psmId);
+
+			if( !psmIdPSMMap.containsKey( percolatorPSMId ) )
 				throw new Exception( "Peptide contains psmId: " + psmId + ", but no PSM with that id was found. Peptide: " + xpeptide.getPeptideId() );
 			
-			PercolatorPSM psm = psmIdPSMMap.get( psmId );	
+			PercolatorPSM psm = psmIdPSMMap.get( percolatorPSMId );
 			
 			if( !psm.getReportedPeptide().equals( xpeptide.getPeptideId() ) )
 				throw new Exception( "PSM (" + psm + ") has a different reported peptide than this peptide id: " + xpeptide.getPeptideId() );
+
+			SubSearchName subSearchName = new SubSearchName(psm.getSubSearchName());
+			ScanNumber scanNumber = new ScanNumber(psm.getScanNumber());
+
+			if(!psmsForPeptide.containsKey(subSearchName)) {
+				psmsForPeptide.put(subSearchName, new HashMap<>());
+			}
+
+			if( !psmsForPeptide.get(subSearchName).containsKey(scanNumber)) {
+				psmsForPeptide.get(subSearchName).put(scanNumber, new HashSet<>());
+			}
 			
-			if( !psmsForPeptide.containsKey( psm.getScanNumber() ) )
-				psmsForPeptide.put( psm.getScanNumber(), new HashSet<>() );
-			
-			psmsForPeptide.get( psm.getScanNumber() ).add( psm );
+			psmsForPeptide.get(subSearchName).get(scanNumber).add( psm );
 		}
 		
 		return psmsForPeptide;
@@ -161,9 +168,9 @@ public class PercolatorResultsReader {
 	 * @param po
 	 * @return
 	 */
-	protected static Map<String, PercolatorPSM> getPercolatorPSMs( IPercolatorOutput po, boolean isOpenMods ) {
+	protected static Map<PercolatorPsmId, PercolatorPSM> getPercolatorPSMs( IPercolatorOutput po, boolean isOpenMods ) {
 		
-		Map<String, PercolatorPSM> psmIdPSMMap = new HashMap<>();
+		Map<PercolatorPsmId, PercolatorPSM> psmIdPSMMap = new HashMap<>();
 		
 	    // loop through PSMs
 	    for( IPsm xpsm : po.getPsms().getPsm() ) {
@@ -171,7 +178,7 @@ public class PercolatorResultsReader {
 	    	PercolatorPSM psm = getPercolatorPSMFromJAXB( xpsm );
 	    	psm.setOpenModResult(isOpenMods);
 
-	    	psmIdPSMMap.put( psm.getPsmId(), psm );
+	    	psmIdPSMMap.put( new PercolatorPsmId(psm.getPsmId()), psm );
 
 	    }
 		
@@ -194,6 +201,12 @@ public class PercolatorResultsReader {
 		psm.setReportedPeptide( xpsm.getPeptideSeq().getSeq() );
 		psm.setScanNumber( PercolatorParsingUtils.getScanNumberFromScanId( xpsm.getPsmId() ) );
 		psm.setSvmScore( Double.valueOf( xpsm.getSvmScore() ) );
+
+		// set the subsearch name, will be null if it doesn't exist
+		psm.setSubSearchName(PercolatorParsingUtils.getSubSearchName(psm.getPsmId()));
+		if(psm.getSubSearchName() == null) {
+			psm.setSubSearchName("default");
+		}
 		
 		return psm;
 	}

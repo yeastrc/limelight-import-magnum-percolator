@@ -1,7 +1,6 @@
 package org.yeastrc.limelight.xml.magnum.utils;
 
-import org.yeastrc.limelight.xml.magnum.objects.PercolatorPeptideResult;
-import org.yeastrc.limelight.xml.magnum.objects.PercolatorResults;
+import org.yeastrc.limelight.xml.magnum.objects.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,7 +20,7 @@ public class PercolatorDataCombiner {
     }
 
     private static void addPercolatorResultstoNewResults(PercolatorResults percolatorResultsToAdd, PercolatorResults newPercolatorResults) {
-        for(String reportedPeptide : percolatorResultsToAdd.getPeptideResults().keySet()) {
+        for(ReportedPeptide reportedPeptide : percolatorResultsToAdd.getPeptideResults().keySet()) {
             PercolatorPeptideResult newPeptideResult = null;
 
             if(newPercolatorResults.getPeptideResults().containsKey(reportedPeptide)) {
@@ -30,22 +29,29 @@ public class PercolatorDataCombiner {
             } else {
 
                 newPeptideResult = new PercolatorPeptideResult();
-                newPeptideResult.setReportedPeptide( reportedPeptide );
+                newPeptideResult.setReportedPeptide( reportedPeptide.getReportedPeptideString() );
                 newPeptideResult.setPercolatorPeptideStats( null );
-                newPeptideResult.setPsmsIndexedByScanNumber(new HashMap<>());
+                newPeptideResult.setPsmMap(new HashMap<>());
 
                 newPercolatorResults.getPeptideResults().put(reportedPeptide, newPeptideResult);
             }
 
 
             PercolatorPeptideResult peptideResultToAdd = percolatorResultsToAdd.getPeptideResults().get(reportedPeptide);
-            for(int scanNumber : peptideResultToAdd.getPsmsIndexedByScanNumber().keySet()) {
+            for(SubSearchName subSearchName : peptideResultToAdd.getPsmMap().keySet()) {
 
-                if(!(newPeptideResult.getPsmsIndexedByScanNumber().containsKey(scanNumber))) {
-                    newPeptideResult.getPsmsIndexedByScanNumber().put(scanNumber, new HashSet<>());
+                if (!(newPeptideResult.getPsmMap().containsKey(subSearchName))) {
+                    newPeptideResult.getPsmMap().put(subSearchName, new HashMap<>());
                 }
 
-                newPeptideResult.getPsmsIndexedByScanNumber().get(scanNumber).addAll(peptideResultToAdd.getPsmsIndexedByScanNumber().get(scanNumber));
+                for (ScanNumber scanNumber : peptideResultToAdd.getPsmMap().get(subSearchName).keySet()) {
+
+                    if (!(newPeptideResult.getPsmMap().get(subSearchName).containsKey(scanNumber))) {
+                        newPeptideResult.getPsmMap().get(subSearchName).put(scanNumber, new HashSet<>());
+                    }
+
+                    newPeptideResult.getPsmMap().get(subSearchName).get(scanNumber).addAll(peptideResultToAdd.getPsmMap().get(subSearchName).get(scanNumber));
+                }
             }
         }
     }

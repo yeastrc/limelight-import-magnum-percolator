@@ -25,6 +25,48 @@ import java.util.Objects;
 
 public class MagnumPSM {
 
+	@Override
+	public String toString() {
+		return "MagnumPSM{" +
+				"retentionTime=" + retentionTime +
+				", scanNumber=" + scanNumber +
+				", charge=" + charge +
+				", observedMass=" + observedMass +
+				", ppmError=" + ppmError +
+				", eValue=" + eValue +
+				", mScore=" + mScore +
+				", dScore=" + dScore +
+				", peptideSequence='" + peptideSequence + '\'' +
+				", modifications=" + modifications +
+				", reporterIons=" + reporterIons +
+				", openModification=" + openModification +
+				", massDiff=" + massDiff +
+				", subSearchName='" + subSearchName + '\'' +
+				", scanFilename='" + scanFilename + '\'' +
+				'}';
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		MagnumPSM magnumPSM = (MagnumPSM) o;
+		return scanNumber == magnumPSM.scanNumber &&
+				charge == magnumPSM.charge &&
+				peptideSequence.equals(magnumPSM.peptideSequence) &&
+				Objects.equals(modifications, magnumPSM.modifications) &&
+				Objects.equals(reporterIons, magnumPSM.reporterIons) &&
+				Objects.equals(openModification, magnumPSM.openModification) &&
+				Objects.equals(massDiff, magnumPSM.massDiff) &&
+				Objects.equals(subSearchName, magnumPSM.subSearchName) &&
+				Objects.equals(scanFilename, magnumPSM.scanFilename);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(scanNumber, charge, peptideSequence, modifications, reporterIons, openModification, massDiff, subSearchName, scanFilename);
+	}
+
 	/**
 	 * @return the retentionTime
 	 */
@@ -175,53 +217,25 @@ public class MagnumPSM {
 		this.massDiff = massDiff;
 	}
 
+	public String getSubSearchName() {
+		return subSearchName;
+	}
+
+	public void setSubSearchName(String subSearchName) {
+		this.subSearchName = subSearchName;
+	}
+
+	public String getScanFilename() {
+		return scanFilename;
+	}
+
+	public void setScanFilename(String scanFilename) {
+		this.scanFilename = scanFilename;
+	}
+
 	private double retentionTime;
 	private int scanNumber;
 	private int charge;
-
-	@Override
-	public String toString() {
-		return "MagnumPSM{" +
-				"retentionTime=" + retentionTime +
-				", scanNumber=" + scanNumber +
-				", charge=" + charge +
-				", observedMass=" + observedMass +
-				", ppmError=" + ppmError +
-				", eValue=" + eValue +
-				", score=" + mScore +
-				", dScore=" + dScore +
-				", peptideSequence='" + peptideSequence + '\'' +
-				", modifications=" + modifications +
-				", reporterIons=" + reporterIons +
-				", openModification=" + openModification +
-				", massDiff=" + massDiff +
-				'}';
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		MagnumPSM magnumPSM = (MagnumPSM) o;
-		return Double.compare(magnumPSM.retentionTime, retentionTime) == 0 &&
-				scanNumber == magnumPSM.scanNumber &&
-				charge == magnumPSM.charge &&
-				Double.compare(magnumPSM.observedMass, observedMass) == 0 &&
-				Double.compare(magnumPSM.ppmError, ppmError) == 0 &&
-				Double.compare(magnumPSM.eValue, eValue) == 0 &&
-				Double.compare(magnumPSM.mScore, mScore) == 0 &&
-				Double.compare(magnumPSM.dScore, dScore) == 0 &&
-				Objects.equals(peptideSequence, magnumPSM.peptideSequence) &&
-				Objects.equals(modifications, magnumPSM.modifications) &&
-				Objects.equals(reporterIons, magnumPSM.reporterIons) &&
-				Objects.equals(openModification, magnumPSM.openModification) &&
-				Objects.equals(massDiff, magnumPSM.massDiff);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(retentionTime, scanNumber, charge, observedMass, ppmError, eValue, mScore, dScore, peptideSequence, modifications, reporterIons, openModification, massDiff);
-	}
 
 	private double observedMass;
 	private double ppmError;
@@ -233,5 +247,7 @@ public class MagnumPSM {
 	private Collection<BigDecimal> reporterIons;
 	private OpenModification openModification;
 	private BigDecimal massDiff;
+	private String subSearchName;
+	private String scanFilename;
 
 }

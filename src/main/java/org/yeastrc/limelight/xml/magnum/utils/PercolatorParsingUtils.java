@@ -27,19 +27,55 @@ public class PercolatorParsingUtils {
 	 * Examples:
 	 * T-46425-94.65
 	 * T-44282-90.35-2
-	 * @param scanId
+	 * @param psmId
 	 * @return
 	 */
-	public static int getScanNumberFromScanId( String scanId ) {
-		
+	public static int getScanNumberFromScanId( String psmId ) {
+
+		// strip out the subsearch if it's there
+		psmId = getPsmIdWithoutSubSearchId(psmId);
+
 		Pattern p = Pattern.compile( "^[TD]-(\\d+)-.+$" );
-		Matcher m = p.matcher( scanId );
+		Matcher m = p.matcher( psmId );
 
 		if( !m.matches() ) {
-			throw new IllegalArgumentException( "Scan id is not of the expected syntax. Got: " + scanId + ", expected something like: T-46425-94.6" );
+			throw new IllegalArgumentException( "Scan id is not of the expected syntax. Got: " + psmId + ", expected something like: T-46425-94.6" );
 		}
 		
 		return Integer.parseInt( m.group( 1 ) );
 	}
+
+	/**
+	 * Return true if the psm contains a sub search identifier as part of the psmId
+	 * @param psmId
+	 * @return
+	 */
+	public static boolean psmHasSubSearch(String psmId) {
+		Pattern p = Pattern.compile("^.+#.+$");
+		Matcher m = p.matcher(psmId);
+		return m.matches();
+	}
+
+	/**
+	 * Get the psmId with the sub search name removed, if it exists
+	 *
+	 * @param psmId
+	 * @return
+	 */
+	public static String getPsmIdWithoutSubSearchId(String psmId) {
+		if(!psmHasSubSearch(psmId)) { return psmId; }
+		return psmId.split("#")[1];
+	}
+
+	/**
+	 * Get the subsearch name, if it exists
+	 * @param psmId
+	 * @return The subsearch name, null if it doesn't exist
+	 */
+	public static String getSubSearchName(String psmId) {
+		if(!psmHasSubSearch(psmId)) { return null; }
+		return psmId.split("#")[0];
+	}
+
 	
 }

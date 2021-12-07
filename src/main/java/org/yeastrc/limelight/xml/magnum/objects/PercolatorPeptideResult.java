@@ -5,23 +5,19 @@ import java.util.Map;
 
 public class PercolatorPeptideResult {
 
-	private Map<Integer, Collection<PercolatorPSM>> psmsIndexedByScanNumber;	
+	private Map<SubSearchName, Map<ScanNumber, Collection<PercolatorPSM>>> psmMap;
 	private PercolatorPeptideStats percolatorPeptideStats;
 	private String reportedPeptide;
-	
 
-	/**
-	 * @return the all PSMs associated with this peptide
-	 */
-	public Map<Integer, Collection<PercolatorPSM>> getPsmsIndexedByScanNumber() {
-		return psmsIndexedByScanNumber;
+
+	public Map<SubSearchName, Map<ScanNumber, Collection<PercolatorPSM>>> getPsmMap() {
+		return psmMap;
 	}
-	/**
-	 * @param psmsIndexedByScanNumber the psmsIndexedByScanNumber to set
-	 */
-	public void setPsmsIndexedByScanNumber(Map<Integer, Collection<PercolatorPSM>> psmsIndexedByScanNumber) {
-		this.psmsIndexedByScanNumber = psmsIndexedByScanNumber;
+
+	public void setPsmMap(Map<SubSearchName, Map<ScanNumber, Collection<PercolatorPSM>>> psmMap) {
+		this.psmMap = psmMap;
 	}
+
 	/**
 	 * @return the percolatorPeptideStats
 	 */
@@ -46,8 +42,5 @@ public class PercolatorPeptideResult {
 	public void setReportedPeptide(String reportedPeptide) {
 		this.reportedPeptide = reportedPeptide;
 	}
-	
-	
-	
 	
 }

@@ -36,24 +36,15 @@ public class MagnumResults {
 		this.magnumVersion = magnumVersion;
 	}
 
-
-
-	/**
-	 * @return the magnumResultMap
-	 */
-	public Map<String, Map<Integer, Collection<MagnumPSM>>> getMagnumResultMap() {
+	public Map<ReportedPeptide, Map<SubSearchName, Map<ScanNumber, Collection<MagnumPSM>>>> getMagnumResultMap() {
 		return magnumResultMap;
 	}
-	/**
-	 * @param magnumResultMap the magnumResultMap to set
-	 */
-	public void setMagnumResultMap(Map<String, Map<Integer, Collection<MagnumPSM>>> magnumResultMap) {
+
+	public void setMagnumResultMap(Map<ReportedPeptide, Map<SubSearchName, Map<ScanNumber, Collection<MagnumPSM>>>> magnumResultMap) {
 		this.magnumResultMap = magnumResultMap;
 	}
 
-
-
 	private String magnumVersion;
-	private Map<String,Map<Integer,Collection<MagnumPSM>>> magnumResultMap;
+	private Map<ReportedPeptide, Map<SubSearchName, Map<ScanNumber, Collection<MagnumPSM>>>> magnumResultMap;
 	
 }
