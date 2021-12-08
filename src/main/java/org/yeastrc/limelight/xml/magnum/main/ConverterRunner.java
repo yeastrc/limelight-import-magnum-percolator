@@ -46,16 +46,17 @@ public class ConverterRunner {
 		MagnumResults magnumResults = MagnumPEPXMLResultsReader.getMagnumResults( conversionParameters.getMagnumOutputFiles(), magParams );
 		System.err.println( " Done." );
 
+		boolean isSubSearches = conversionParameters.getMagnumOutputFiles().length > 1;
 		PercolatorResults percolatorResults = null;
 
 		if(conversionParameters.getOpenModsSeparate()) {
 
 			System.err.print( "Reading open mods Percolator data into memory..." );
-			PercolatorResults openModsPercolatorResults = PercolatorResultsReader.getPercolatorResults( conversionParameters.getOpenModsPercolatorXMLOutputFile(), true );
+			PercolatorResults openModsPercolatorResults = PercolatorResultsReader.getPercolatorResults( conversionParameters.getOpenModsPercolatorXMLOutputFile(), true, isSubSearches );
 			System.err.println( " Done." );
 
 			System.err.print( "Reading standard Percolator data into memory..." );
-			PercolatorResults standardPercolatorResults = PercolatorResultsReader.getPercolatorResults( conversionParameters.getStandardPercolatorXMLOutputFile(), false );
+			PercolatorResults standardPercolatorResults = PercolatorResultsReader.getPercolatorResults( conversionParameters.getStandardPercolatorXMLOutputFile(), false, isSubSearches );
 			System.err.println( " Done." );
 
 			// combine these into a single set of results
@@ -66,7 +67,7 @@ public class ConverterRunner {
 		} else {
 
 			System.err.print( "Reading Percolator data into memory..." );
-			percolatorResults = PercolatorResultsReader.getPercolatorResults( conversionParameters.getPercolatorXMLOutputFile(), false );
+			percolatorResults = PercolatorResultsReader.getPercolatorResults( conversionParameters.getPercolatorXMLOutputFile(), false, isSubSearches );
 			System.err.println( " Done." );
 		}
 		

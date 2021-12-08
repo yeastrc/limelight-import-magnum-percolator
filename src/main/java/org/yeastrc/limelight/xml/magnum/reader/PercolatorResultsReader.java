@@ -44,12 +44,12 @@ public class PercolatorResultsReader {
 	 * @return
 	 * @throws Throwable
 	 */
-	public static PercolatorResults getPercolatorResults( File file, boolean isOpenMods ) throws Throwable {
+	public static PercolatorResults getPercolatorResults( File file, boolean isOpenMods, boolean isSubSearches ) throws Throwable {
 				
 		IPercolatorOutput po = getIPercolatorOutput( file );
 		String version = getPercolatorVersion( po );
 		
-		Map<PercolatorPsmId, PercolatorPSM> psmIdPSMMap = getPercolatorPSMs( po, isOpenMods );
+		Map<PercolatorPsmId, PercolatorPSM> psmIdPSMMap = getPercolatorPSMs( po, isOpenMods, isSubSearches );
 		Map<ReportedPeptide, PercolatorPeptideResult> peptideResults = getPercolatorPeptidePSMMap( po, psmIdPSMMap );
 		
 		psmIdPSMMap = null;
@@ -168,7 +168,7 @@ public class PercolatorResultsReader {
 	 * @param po
 	 * @return
 	 */
-	protected static Map<PercolatorPsmId, PercolatorPSM> getPercolatorPSMs( IPercolatorOutput po, boolean isOpenMods ) {
+	protected static Map<PercolatorPsmId, PercolatorPSM> getPercolatorPSMs( IPercolatorOutput po, boolean isOpenMods, boolean isSubSearches ) {
 		
 		Map<PercolatorPsmId, PercolatorPSM> psmIdPSMMap = new HashMap<>();
 		
@@ -176,7 +176,16 @@ public class PercolatorResultsReader {
 	    for( IPsm xpsm : po.getPsms().getPsm() ) {
 	    	
 	    	PercolatorPSM psm = getPercolatorPSMFromJAXB( xpsm );
+
 	    	psm.setOpenModResult(isOpenMods);
+
+			// set the subsearch name, will be null if it doesn't exist
+			psm.setSubSearchName(PercolatorParsingUtils.getSubSearchName(psm.getPsmId()));
+
+			// if there are not subsearches, always set the subsearch name to "default"
+			if(!isSubSearches || psm.getSubSearchName() == null) {
+				psm.setSubSearchName("default");
+			}
 
 	    	psmIdPSMMap.put( new PercolatorPsmId(psm.getPsmId()), psm );
 
@@ -201,12 +210,6 @@ public class PercolatorResultsReader {
 		psm.setReportedPeptide( xpsm.getPeptideSeq().getSeq() );
 		psm.setScanNumber( PercolatorParsingUtils.getScanNumberFromScanId( xpsm.getPsmId() ) );
 		psm.setSvmScore( Double.valueOf( xpsm.getSvmScore() ) );
-
-		// set the subsearch name, will be null if it doesn't exist
-		psm.setSubSearchName(PercolatorParsingUtils.getSubSearchName(psm.getPsmId()));
-		if(psm.getSubSearchName() == null) {
-			psm.setSubSearchName("default");
-		}
 		
 		return psm;
 	}
