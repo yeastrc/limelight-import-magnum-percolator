@@ -1,6 +1,7 @@
 # Magnum + Percolator to Limelight XML converter
 
-Use this program to convert the results of a Magnum + Percolator analysis to limelight XML suitable for import into the limelight web application.
+Use this program to convert the results of a Magnum + Percolator analysis to Limelight XML suitable for import into the Limelight web application.
+More information about Limelight can be found at https://limelight-ms.org/.
 
 
 ## How To Run
@@ -46,7 +47,7 @@ Regardless of how you run the converter, it will take the same command line para
 the command line statement typed into the terminal. To see the available command line arguments, run
 the converter with no arguments. For example:
 
-- If you have your own Java installed: `java -jar /path/to/magnumToLimelightXML.jar -V`
+- If you have your own Java installed: `java -jar /path/to/magnumToLimelightXML.jar`
 - If you are using Docker: ``sudo docker run --rm -it --user $(id -u):$(id -g) -v `pwd`:`pwd` -w `pwd` mriffle/magnum-percolator-to-limelight``
 
 An example command for converting real data would be the following. Note, these command assume you
