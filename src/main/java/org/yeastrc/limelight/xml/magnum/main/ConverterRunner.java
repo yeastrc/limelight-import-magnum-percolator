@@ -41,10 +41,15 @@ public class ConverterRunner {
 		System.err.print( "Reading Magnum params into memory..." );
 		MagnumParameters magParams = MagnumParamsReader.getMagnumParameters( conversionParameters.getMagnumParametersFiles()[0] );
 		System.err.println( " Done." );
-		
+
 		System.err.print( "Reading Magnum data into memory..." );
 		MagnumResults magnumResults = MagnumPEPXMLResultsReader.getMagnumResults( conversionParameters.getMagnumOutputFiles(), magParams );
 		System.err.println( " Done." );
+
+		ParsedMagnumResultsStats parsedMagnumResultsStats = new ParsedMagnumResultsStats(magnumResults);
+		System.err.println("Magnum search stats:");
+		System.err.println("\tScans: " + parsedMagnumResultsStats.getScanCount());
+		System.err.println("\tPSMs: " + parsedMagnumResultsStats.getPsmCount());
 
 		boolean isSubSearches = conversionParameters.getMagnumOutputFiles().length > 1;
 		PercolatorResults percolatorResults = null;
@@ -70,8 +75,13 @@ public class ConverterRunner {
 			percolatorResults = PercolatorResultsReader.getPercolatorResults( conversionParameters.getPercolatorXMLOutputFile(), false, isSubSearches );
 			System.err.println( " Done." );
 		}
-		
-		System.err.print( "Ensuring Percolator and magnum data match up..." );
+
+		ParsedPercolatorResultsStats parsedPercolatorResultsStats = new ParsedPercolatorResultsStats(percolatorResults);
+		System.err.println("Stats after percolator:");
+		System.err.println("\tScans: " + parsedPercolatorResultsStats.getScanCount());
+		System.err.println("\tPSMs: " + parsedPercolatorResultsStats.getPsmCount());
+
+		System.err.print( "Ensuring all Percolator results have Magnum results..." );
 		MagnumParsingUtils.mapMagnumPSMsToPercolatorReportedPeptides( magnumResults, percolatorResults );
 		DataComparer.compareData( magnumResults, percolatorResults );
 		System.err.println( " Done." );
