@@ -16,6 +16,7 @@ import javax.xml.bind.Unmarshaller;
 
 import org.yeastrc.limelight.xml.magnum.constants.MagnumConstants;
 import org.yeastrc.limelight.xml.magnum.objects.*;
+import org.yeastrc.limelight.xml.magnum.utils.DecoyUtils;
 import org.yeastrc.limelight.xml.magnum.utils.ModParsingUtils;
 
 import net.systemsbiology.regis_web.pepxml.ModInfoDataType;
@@ -71,6 +72,10 @@ public class MagnumPEPXMLResultsReader {
 
 					for (SearchResult searchResult : spectrumQuery.getSearchResult()) {
 						for (SearchHit searchHit : searchResult.getSearchHit()) {
+
+							if(DecoyUtils.searchHitIsDecoy(searchHit, params.getDecoyPrefix())) {
+								continue;
+							}
 
 							MagnumPSM psm = null;
 
