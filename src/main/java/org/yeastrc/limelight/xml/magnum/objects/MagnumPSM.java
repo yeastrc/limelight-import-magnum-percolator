@@ -233,6 +233,22 @@ public class MagnumPSM {
 		this.scanFilename = scanFilename;
 	}
 
+	public boolean isDecoy() {
+		return isDecoy;
+	}
+
+	public void setDecoy(boolean decoy) {
+		isDecoy = decoy;
+	}
+
+	public boolean isIndependentDecoy() {
+		return isIndependentDecoy;
+	}
+
+	public void setIndependentDecoy(boolean independentDecoy) {
+		isIndependentDecoy = independentDecoy;
+	}
+
 	private double retentionTime;
 	private int scanNumber;
 	private int charge;
@@ -249,5 +265,7 @@ public class MagnumPSM {
 	private BigDecimal massDiff;
 	private String subSearchName;
 	private String scanFilename;
+	private boolean isDecoy = false;
+	private boolean isIndependentDecoy = false;
 
 }

@@ -59,6 +59,12 @@ public class MainProgram implements Runnable {
 	@CommandLine.Option(names = { "-f", "--fasta-file" }, required = true, description = "Full path to FASTA file used in the experiment.")
 	private File fastaFile;
 
+	@CommandLine.Option(names = { "-d", "--import-decoys" }, required = false, description = "(Optional) If this parameter is set, decoys will be imported. Note, percolator must be run with -Z to output decoys.")
+	private boolean importDecoys;
+
+	@CommandLine.Option(names = { "-i", "--independent-decoy-prefix" }, required = false, description = "If present, any hits to proteins that begin with this string will be considered \"independent decoys,\" for the purpose of error estimation. See: https://pubmed.ncbi.nlm.nih.gov/21876204/")
+	private String independentDecoyPrefix;;
+
 	@CommandLine.Option(names = { "-q", "--q-value" }, required = false, description = "(Optional) Override the default q-value cutoff to this value.")
 	private BigDecimal qValueOverride;
 
@@ -142,6 +148,8 @@ public class MainProgram implements Runnable {
         cp.setOpenModsSeparate(openModsSeparate);
         cp.setOpenModsPercolatorXMLOutputFile(openModPercolatorFile);
         cp.setStandardPercolatorXMLOutputFile(standardPercolatorFile);
+		cp.setImportDecoys(importDecoys);
+		cp.setIndependentDecoyPrefix(independentDecoyPrefix);
 
         try {
 			ConverterRunner.createInstance().convertMagnumToLimelightXML(cp);

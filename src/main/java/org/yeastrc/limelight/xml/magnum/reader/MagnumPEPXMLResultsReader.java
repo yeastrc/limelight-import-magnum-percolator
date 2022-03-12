@@ -38,7 +38,7 @@ public class MagnumPEPXMLResultsReader {
 	 * @return
 	 * @throws Throwable
 	 */
-	public static MagnumResults getMagnumResults( File[] pepXMLFiles, MagnumParameters params ) throws Throwable {
+	public static MagnumResults getMagnumResults( File[] pepXMLFiles, MagnumParameters params, ConversionParameters conversionParameters) throws Throwable {
 
 		Map<ReportedPeptide, Map<SubSearchName, Map<ScanNumber,Collection<MagnumPSM>>>> resultMap = new HashMap<>();
 
@@ -73,7 +73,7 @@ public class MagnumPEPXMLResultsReader {
 					for (SearchResult searchResult : spectrumQuery.getSearchResult()) {
 						for (SearchHit searchHit : searchResult.getSearchHit()) {
 
-							if(DecoyUtils.searchHitIsDecoy(searchHit, params.getDecoyPrefix())) {
+							if(!(conversionParameters.isImportDecoys()) && DecoyUtils.searchHitIsDecoy(searchHit, params.getDecoyPrefix())) {
 								continue;
 							}
 
@@ -81,6 +81,9 @@ public class MagnumPEPXMLResultsReader {
 
 							try {
 								psm = getPsmFromSearchHit(searchHit, charge, scanNumber, obsMass, retentionTime);
+
+								psm.setDecoy(DecoyUtils.searchHitIsDecoy(searchHit, params.getDecoyPrefix()));
+								psm.setIndependentDecoy(DecoyUtils.searchHitIsIndependentDecoy(searchHit, conversionParameters.getIndependentDecoyPrefix()));
 
 								if(pepXMLFiles.length > 1) {
 									psm.setScanFilename(scanFilename);

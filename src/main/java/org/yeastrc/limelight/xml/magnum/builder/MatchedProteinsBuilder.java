@@ -34,18 +34,19 @@ public class MatchedProteinsBuilder {
 	 * @param decoyPrefix
 	 * @throws Exception
 	 */
-	public void buildMatchedProteins( LimelightInput limelightInputRoot, File fastaFile, Collection<String> reportedPeptides, String decoyPrefix ) throws Exception {
-		
+	public void buildMatchedProteins( LimelightInput limelightInputRoot, File fastaFile, Collection<String> reportedPeptides, boolean importDecoys, String decoyPrefix, boolean importIndependentDecoys, String independentDecoyPrefix ) throws Exception {
+
+
 		System.err.print( " Matching peptides to proteins..." );
 
 		// process the reported peptides to get naked peptide objects
 		Collection<PeptideObject> nakedPeptideObjects = getNakedPeptideObjectsForPercolatorReportedPeptides( reportedPeptides );
 		
 		// find the proteins matched by any of these peptides
-		Map<String, Collection<FastaProteinAnnotation>> proteins = getProteins( nakedPeptideObjects, fastaFile, decoyPrefix );
+		Map<String, Collection<FastaProteinAnnotation>> proteins = getProteins( nakedPeptideObjects, fastaFile );
 		
 		// create the XML and add to root element
-		buildAndAddMatchedProteinsToXML( limelightInputRoot, proteins );
+		buildAndAddMatchedProteinsToXML( limelightInputRoot, proteins, importDecoys, decoyPrefix, importIndependentDecoys, independentDecoyPrefix );
 		
 	}
 	
@@ -67,12 +68,7 @@ public class MatchedProteinsBuilder {
 		return nakedPeptideObjects;
 	}
 	
-	
-	
-	
 	/* ***************** REST OF THIS CAN BE MOVED TO CENTRALIZED LIB **************************** */
-	
-	
 	
 	/**
 	 * Do the work of building the matched peptides element and adding to limelight xml root
@@ -81,7 +77,7 @@ public class MatchedProteinsBuilder {
 	 * @param proteins
 	 * @throws Exception
 	 */
-	private void buildAndAddMatchedProteinsToXML( LimelightInput limelightInputRoot, Map<String, Collection<FastaProteinAnnotation>> proteins ) throws Exception {
+	private void buildAndAddMatchedProteinsToXML( LimelightInput limelightInputRoot, Map<String, Collection<FastaProteinAnnotation>> proteins, boolean importDecoys, String decoyPrefix, boolean importIndependentDecoys, String independentDecoyPrefix ) throws Exception {
 		
 		MatchedProteins xmlMatchedProteins = new MatchedProteins();
 		limelightInputRoot.setMatchedProteins( xmlMatchedProteins );
@@ -89,13 +85,40 @@ public class MatchedProteinsBuilder {
 		for( String sequence : proteins.keySet() ) {
 			
 			if( proteins.get( sequence ).isEmpty() ) continue;
-			
+
+			// don't import this protein at all if it's a decoy and we're not importing decoys
+			if(!importDecoys && isProteinDecoy(proteins.get( sequence ), decoyPrefix)) {
+				continue;
+			}
+
 			MatchedProtein xmlProtein = new MatchedProtein();
         	xmlMatchedProteins.getMatchedProtein().add( xmlProtein );
         	
         	xmlProtein.setSequence( sequence );
-        	        	
+
+			if(importDecoys) {
+				if(isProteinDecoy(proteins.get( sequence ), decoyPrefix)) {
+					xmlProtein.setIsDecoy(true);
+				} else {
+					xmlProtein.setIsDecoy(false);
+				}
+			}
+
+			if(importIndependentDecoys) {
+				if(isProteinIndependentDecoy(proteins.get( sequence ), independentDecoyPrefix)) {
+					xmlProtein.setIsIndependentDecoy(true);
+				} else {
+					xmlProtein.setIsIndependentDecoy(false);
+				}
+			}
+
         	for( FastaProteinAnnotation anno : proteins.get( sequence ) ) {
+
+				// do not add decoy annotations if we are not importing decoys
+				if(!importDecoys && anno.getName().startsWith(decoyPrefix)) {
+					continue;
+				}
+
         		MatchedProteinLabel xmlMatchedProteinLabel = new MatchedProteinLabel();
         		xmlProtein.getMatchedProteinLabel().add( xmlMatchedProteinLabel );
         		
@@ -110,17 +133,54 @@ public class MatchedProteinsBuilder {
 		}
 	}
 
+	/**
+	 * Return true if all fasta annotation protein names start with decoy prefix
+	 *
+	 * @param proteins
+	 * @param decoyPrefix
+	 * @return
+	 */
+	private boolean isProteinDecoy(Collection<FastaProteinAnnotation> proteins, String decoyPrefix) {
+
+		if(decoyPrefix == null) { return false; }
+
+		for(FastaProteinAnnotation anno : proteins) {
+			if(!(anno.getName().startsWith(decoyPrefix))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Return true if all fasta annotation protein names start with independent decoy prefix
+	 *
+	 * @param proteins
+	 * @param independentDecoyPrefix
+	 * @return
+	 */
+	private boolean isProteinIndependentDecoy(Collection<FastaProteinAnnotation> proteins, String independentDecoyPrefix) {
+
+		if(independentDecoyPrefix == null) { return false; }
+
+		for(FastaProteinAnnotation anno : proteins) {
+			if(!(anno.getName().startsWith(independentDecoyPrefix))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 
 	/**
 	 * Get a map of the distinct target protein sequences mapped to a collection of target annotations for that sequence
 	 * from the given fasta file, where the sequence contains any of the supplied peptide sequences
 	 * @param nakedPeptideObjects
 	 * @param fastaFile
-	 * @param decoyPrefix
 	 * @return
 	 * @throws Exception
 	 */
-	private Map<String, Collection<FastaProteinAnnotation>> getProteins( Collection<PeptideObject> nakedPeptideObjects, File fastaFile, String decoyPrefix ) throws Exception {
+	private Map<String, Collection<FastaProteinAnnotation>> getProteins( Collection<PeptideObject> nakedPeptideObjects, File fastaFile ) throws Exception {
 		
 		Map<String, Collection<FastaProteinAnnotation>> proteinAnnotations = new HashMap<>();
 
@@ -134,11 +194,6 @@ public class MatchedProteinsBuilder {
 			for ( FASTAEntry entry = parser.getNextEntry(); entry != null; entry = parser.getNextEntry() ) {
 				count++;
 				boolean foundPeptideForFASTAEntry = false;
-				
-				// skip this if it's a decoy
-				if( fastaEntryIsDecoy( entry, decoyPrefix ) ) {
-					continue;
-				}
 				
 				// use this sequence to determine if it contains a peptide sequence
 				String fastaSequence = entry.getSequence().replaceAll( "L", "I" );
@@ -206,23 +261,6 @@ public class MatchedProteinsBuilder {
 		}
 		
 		return proteinAnnotations;
-	}
-
-	private boolean fastaEntryIsDecoy( FASTAEntry fastaEntry, String decoyPrefix ) {
-		
-		if( decoyPrefix == null ) {
-			return false;
-		}
-		
-		for( FASTAHeader header : fastaEntry.getHeaders() ) {
-			String fastaHeaderName = header.getName();
-			if( !fastaHeaderName.startsWith( decoyPrefix ) ) {
-				return false;
-			}
-		}
-		
-		// if here, all fasta header names started with decoyPrefix
-		return true;
 	}
 	
 	private boolean nakedPeptideObjectsContainsUnmatchedPeptides( Collection<PeptideObject> nakedPeptideObjects ) {
