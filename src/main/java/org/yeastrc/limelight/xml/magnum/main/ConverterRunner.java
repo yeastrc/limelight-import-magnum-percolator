@@ -77,7 +77,7 @@ public class ConverterRunner {
 		}
 
 		ParsedPercolatorResultsStats parsedPercolatorResultsStats = new ParsedPercolatorResultsStats(percolatorResults);
-		System.err.println("Stats after percolator:");
+		System.err.println("Percolator search stats:");
 		System.err.println("\tScans: " + parsedPercolatorResultsStats.getScanCount());
 		System.err.println("\tPSMs: " + parsedPercolatorResultsStats.getPsmCount());
 
@@ -85,7 +85,12 @@ public class ConverterRunner {
 		MagnumParsingUtils.mapMagnumPSMsToPercolatorReportedPeptides( magnumResults, percolatorResults );
 		DataComparer.compareData( magnumResults, percolatorResults );
 		System.err.println( " Done." );
-		
+
+		System.err.println("Search stats after merging with Percolator:");
+		parsedMagnumResultsStats = new ParsedMagnumResultsStats(magnumResults);
+		System.err.println("\tScans: " + parsedMagnumResultsStats.getScanCount());
+		System.err.println("\tPSMs: " + parsedMagnumResultsStats.getPsmCount());
+
 		System.err.print( "Writing out XML..." );
 		(new XMLBuilder()).buildAndSaveXML( conversionParameters, magnumResults, magParams, percolatorResults);
 		System.err.println( " Done." );
