@@ -302,6 +302,14 @@ public class XMLBuilder {
 							xmlPsm.setPrecursorMZ(MassUtils.getObservedMoverZForPsm(magnumPSM));
 							xmlPsm.setPrecursorRetentionTime(BigDecimal.valueOf(magnumPSM.getRetentionTime()));
 
+							if(conversionParameters.isImportDecoys()) {
+								xmlPsm.setIsDecoy(magnumPSM.isDecoy());
+							}
+
+							if(conversionParameters.getIndependentDecoyPrefix() != null) {
+								xmlPsm.setIsIndependentDecoy(magnumPSM.isIndependentDecoy());
+							}
+
 							// we have sub searches
 							if(conversionParameters.getMagnumOutputFiles().length > 1) {
 								xmlPsm.setScanFileName(magnumPSM.getScanFilename());
@@ -432,16 +440,29 @@ public class XMLBuilder {
 
 		// add in the matched proteins section
 		MatchedProteinsBuilder.getInstance().buildMatchedProteins(
-				                                                   limelightInputRoot,
-				                                                   conversionParameters.getFastaFile(),
-				                                                   percolatorResults.getPeptideResults().keySet()
-																		   .stream()
-																		   .map(org.yeastrc.limelight.xml.magnum.objects.ReportedPeptide::getReportedPeptideString)
-																		   .collect(Collectors.toSet()),
-				                                                   magnumParameters.getDecoyPrefix()
-				                                                  );
-		
-		
+				limelightInputRoot,
+				conversionParameters.getFastaFile(),
+				percolatorResults.getPeptideResults().keySet()
+						.stream()
+						.map(org.yeastrc.limelight.xml.magnum.objects.ReportedPeptide::getReportedPeptideString)
+						.collect(Collectors.toSet()),
+				conversionParameters.isImportDecoys(),
+				magnumParameters.getDecoyPrefix(),
+				conversionParameters.getIndependentDecoyPrefix() != null,
+				conversionParameters.getIndependentDecoyPrefix()
+		);
+
+
+		// add in the fasta file statistics, if necessary
+		if(conversionParameters.getIndependentDecoyPrefix() != null) {
+			FastaFileStatisticsBuilder.getInstance().buildFastaFileStatistics(
+					limelightInputRoot,
+					conversionParameters.getFastaFile(),
+					magnumParameters.getDecoyPrefix(),
+					conversionParameters.getIndependentDecoyPrefix()
+			);
+		}
+
 		// add in the config file(s)
 		ConfigurationFiles xmlConfigurationFiles = new ConfigurationFiles();
 		limelightInputRoot.setConfigurationFiles( xmlConfigurationFiles );

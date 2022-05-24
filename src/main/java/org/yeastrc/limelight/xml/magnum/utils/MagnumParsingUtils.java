@@ -94,6 +94,10 @@ public class MagnumParsingUtils {
 			}
 
 		}
+
+//		System.err.println("Warning: Could not find candidate percolator peptide for magnum PSM.");
+//		System.err.println("Magnum PSM: " + magnumPSM);
+//		System.err.println("Candidate peptides (none of which were found: " + reportedPeptideStringCandidates);
 		
 		return null;
 	}

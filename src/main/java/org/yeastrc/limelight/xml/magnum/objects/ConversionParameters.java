@@ -129,6 +129,22 @@ public class ConversionParameters {
 		this.qValueOverride = qValueOverride;
 	}
 
+	public boolean isImportDecoys() {
+		return importDecoys;
+	}
+
+	public void setImportDecoys(boolean importDecoys) {
+		this.importDecoys = importDecoys;
+	}
+
+	public String getIndependentDecoyPrefix() {
+		return independentDecoyPrefix;
+	}
+
+	public void setIndependentDecoyPrefix(String independentDecoyPrefix) {
+		this.independentDecoyPrefix = independentDecoyPrefix;
+	}
+
 	private File fastaFile;
 	private File[] magnumParametersFiles;
 	private File percolatorXMLOutputFile;
@@ -139,5 +155,6 @@ public class ConversionParameters {
 	private ConversionProgramInfo conversionProgramInfo;
 	private BigDecimal qValueOverride;
 	private Boolean isOpenModsSeparate;
-	
+	private boolean importDecoys = false;
+	private String independentDecoyPrefix;
 }

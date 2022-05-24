@@ -153,6 +153,14 @@ public class PercolatorPSM {
 		this.subSearchName = subSearchName;
 	}
 
+	public boolean isDecoy() {
+		return isDecoy;
+	}
+
+	public void setDecoy(boolean decoy) {
+		isDecoy = decoy;
+	}
+
 	private double svmScore;
 	private double qValue;
 	private double pValue;
@@ -161,5 +169,6 @@ public class PercolatorPSM {
 	private String psmId;
 	private int scanNumber;
 	private boolean isOpenModResult = false;
+	private boolean isDecoy = false;
 	private String subSearchName;
 }
