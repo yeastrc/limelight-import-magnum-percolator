@@ -241,17 +241,37 @@ public class XMLBuilder {
 
 			// add in the mods for this peptide
 			if( parsedPeptide.getModMap() != null && parsedPeptide.getModMap().keySet().size() > 0 ) {
-					
+
 				PeptideModifications xmlModifications = new PeptideModifications();
-				xmlReportedPeptide.setPeptideModifications( xmlModifications );
-					
-				for( int position : parsedPeptide.getModMap().keySet() ) {
-					PeptideModification xmlModification = new PeptideModification();
-					xmlModifications.getPeptideModification().add( xmlModification );
-							
-					xmlModification.setMass( BigDecimal.valueOf( parsedPeptide.getModMap().get( position ) ).stripTrailingZeros().setScale( 0 ) );
-					xmlModification.setPosition( new BigInteger( String.valueOf( position ) ) );
-				}
+				xmlReportedPeptide.setPeptideModifications(xmlModifications);
+
+				// read in first PSM and use its variable mods--should be the same for all PSMs for this reported peptide
+				for (SubSearchName subSearchName : peptideResult.getPsmMap().keySet()) {
+					for (ScanNumber scanNumberObject : peptideResult.getPsmMap().get(subSearchName).keySet()) {
+
+						Collection<MagnumPSM> magnumPSMs = magnumResults.getMagnumResultMap().get(percolatorReportedPeptideObject).get(subSearchName).get(scanNumberObject);
+						for (MagnumPSM magnumPSM : magnumPSMs) {
+
+							for (int position : magnumPSM.getModifications().keySet()) {
+								PeptideModification xmlModification = new PeptideModification();
+								xmlModifications.getPeptideModification().add(xmlModification);
+
+								xmlModification.setMass(magnumPSM.getModifications().get(position));
+								xmlModification.setPosition(new BigInteger(String.valueOf(position)));
+
+							}// end iterating over positions
+
+							break;	// only process 1 psm
+
+						}//end iterating over psms
+
+						break; // only process 1 scan number
+
+					}//end iterating over scan numbers
+
+					break; // only process 1 subsearch
+
+				}//end iterating over subsearches
 			}
 
 			
