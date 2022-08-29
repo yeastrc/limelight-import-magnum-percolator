@@ -243,13 +243,24 @@ public class XMLBuilder {
 					
 				PeptideModifications xmlModifications = new PeptideModifications();
 				xmlReportedPeptide.setPeptideModifications( xmlModifications );
-					
-				for( int position : parsedPeptide.getModMap().keySet() ) {
-					PeptideModification xmlModification = new PeptideModification();
-					xmlModifications.getPeptideModification().add( xmlModification );
-							
-					xmlModification.setMass( BigDecimal.valueOf( parsedPeptide.getModMap().get( position ) ).stripTrailingZeros().setScale( 0 ) );
-					xmlModification.setPosition( new BigInteger( String.valueOf( position ) ) );
+
+				// read in first PSM and use its variable mods--should be the same for all PSMs for this reported peptide
+				for( int scanNumber : peptideResult.getPsmsIndexedByScanNumber().keySet() ) {
+
+					Collection<MagnumPSM> magnumPSMs = magnumResults.getMagnumResultMap().get(percolatorReportedPeptide).get(scanNumber);
+					for (MagnumPSM magnumPSM : magnumPSMs) {
+
+						for( int position : magnumPSM.getModifications().keySet() ) {
+							PeptideModification xmlModification = new PeptideModification();
+							xmlModifications.getPeptideModification().add( xmlModification );
+
+							xmlModification.setMass( magnumPSM.getModifications().get( position ) );
+							xmlModification.setPosition( new BigInteger( String.valueOf( position ) ) );
+						}
+
+						break;
+					}
+					break;
 				}
 			}
 
