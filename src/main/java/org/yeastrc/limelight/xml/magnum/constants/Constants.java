@@ -25,6 +25,8 @@ public class Constants {
 	
 	public static final String CONVERSION_PROGRAM_NAME = "magnumToLimelightXML.jar";
 	public static final String CONVERSION_PROGRAM_URI = "https://github.com/yeastrc/limelight-import-magnum-percolator";
-	public static final String CONVERSION_PROGRAM_VERSION = "4.4.0";
+
+	//  Removed as now retrieved from file which is populated from environment variable which is populated from GIT release tag
+//	public static final String CONVERSION_PROGRAM_VERSION = "4.4.0";
 	
 }
